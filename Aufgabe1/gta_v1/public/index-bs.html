@@ -6,7 +6,7 @@
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<title>GeoTagApp</title>
-		<link rel='stylesheet' href='./stylesheets/style-bs.css'/>
+		<link rel="stylesheet" href="./stylesheets/style-bs.css" type="text/css"/>
 		<link rel="stylesheet" href="./stylesheets/bootstrap.min.css">
 	</head>
 
@@ -30,7 +30,22 @@
 				<h2>Tagging</h2>
 
 				<!-- ############### Aufgabe1a Form1 Start -->
-				<form id="tag-form" action="/tagging" method="post"></form>
+				<form id="tag-form" action="/tagging" method="post">
+					<fieldset>
+						<legend id="taggingLegend">Enter new Geo-Tag</legend>
+						<label>latitude</label><br>
+						<input id="latInput" name="latitude" type="number" max="90" min="-90" placeholder="Ex: 45.12345" required step="any"/></br>
+						<label>longitude</label><br>
+						<input id="longInput" name="longitude" type="number" max="180" min="-180" placeholder="Ex: -45.12345" required step="any"/></br>
+						<label>name</label><br>
+						<input id="nameInput" name="name" type="text" maxlength="10" placeholder="max: 10 letters" required/></br>
+						<label>hashtag</label><br>
+						<input id="hashtagInput" name="hashtag" type="text" maxlength="11" placeholder="# + max: 10 letters" pattern="#([a-z0-9]+)"/></br>
+						<input id="submitTagging" type="submit" value="submit" class="btn-default" />
+					</fieldset>
+
+
+				</form>
 				<!-- ############### Aufgabe1a Form1 Ende -->
 
 			</section>
@@ -40,6 +55,14 @@
 
 				<!-- ############### Aufgabe1a Form2 Start -->
 				<form id="filter-form" action="/discovery" method="post">Filter
+					<fieldset>
+						<legend id="filterLegend">Filter by Searchterm</legend>
+						<input id="searchInput" maxlength="11" required type="text" placeholder="search term">
+						<input id="longDiscovery" type="hidden" value="0.0">
+						<input id="latDiscovery" type="hidden" value="0.0">
+						<input id="submitDiscovery" type="submit" value="apply" class="bg-info">
+
+					</fieldset>
 				</form>
 				<!-- ############### Aufgabe1a Form2 Ende -->
 
