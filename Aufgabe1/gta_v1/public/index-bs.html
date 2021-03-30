@@ -31,20 +31,18 @@
 
 				<!-- ############### Aufgabe1a Form1 Start -->
 				<form id="tag-form" action="/tagging" method="post">
-					<fieldset>
+					<fieldset class="scheduler-border">
 						<legend id="taggingLegend">Enter new Geo-Tag</legend>
-						<label>latitude</label><br>
-						<input id="latInput" name="latitude" type="number" max="90" min="-90" placeholder="Ex: 45.12345" required step="any"/></br>
-						<label>longitude</label><br>
-						<input id="longInput" name="longitude" type="number" max="180" min="-180" placeholder="Ex: -45.12345" required step="any"/></br>
-						<label>name</label><br>
-						<input id="nameInput" name="name" type="text" maxlength="10" placeholder="max: 10 letters" required/></br>
-						<label>hashtag</label><br>
-						<input id="hashtagInput" name="hashtag" type="text" maxlength="11" placeholder="# + max: 10 letters" pattern="#([a-z0-9]+)"/></br>
+						<label for="latInput">latitude</label><br>
+							<input id="latInput" name="latitude" type="number" max="90" min="-90" placeholder="Ex: 45.12345" required step="any"/></br>
+						<label for="longInput">longitude</label><br>
+							<input id="longInput" name="longitude" type="number" max="180" min="-180" placeholder="Ex: -45.12345" required step="any"/></br>
+						<label for="nameInput">name</label><br>
+							<input id="nameInput" name="name" type="text" maxlength="10" placeholder="max: 10 letters" required/></br>
+						<label for="hashtagInput">hashtag</label><br>
+							<input id="hashtagInput" name="hashtag" type="text" maxlength="11" placeholder="# + max: 10 letters" pattern="#([a-z0-9]+)"/></br>
 						<input id="submitTagging" type="submit" value="submit" class="btn-default" />
 					</fieldset>
-
-
 				</form>
 				<!-- ############### Aufgabe1a Form1 Ende -->
 
@@ -55,7 +53,7 @@
 
 				<!-- ############### Aufgabe1a Form2 Start -->
 				<form id="filter-form" action="/discovery" method="post">Filter
-					<fieldset>
+					<fieldset class="form-group">
 						<legend id="filterLegend">Filter by Searchterm</legend>
 						<input id="searchInput" maxlength="11" required type="text" placeholder="search term">
 						<input id="longDiscovery" type="hidden" value="0.0">
