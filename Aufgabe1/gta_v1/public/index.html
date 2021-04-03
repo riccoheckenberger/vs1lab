@@ -20,15 +20,15 @@
 			</nav>
 		</header>
 
-		<main>
+		<main class="row">
 
-			<section class="tagging">
+			<section class="tagging col-3">
 				<h2>Tagging</h2>
 
 				<!-- ############### Aufgabe1a Form1 Start -->
 				<form id="tag-form" action="/tagging" method="post">
-					<fieldset class="scheduler-border">
-						<legend id="taggingLegend">Enter new Geo-Tag</legend>
+					<fieldset>
+						<legend class="legend" id="taggingLegend">Enter new Geo-Tag</legend>
 						<label for="latInput">latitude</label><br>
 						<input id="latInput" name="latitude" type="number" max="90" min="-90" placeholder="Ex: 45.12345" required step="any"/></br>
 						<label for="longInput">longitude</label><br>
@@ -44,13 +44,13 @@
 
 			</section>
 
-			<section class="discovery">
+			<section class="discovery col-9">
 				<h2>Discovery</h2>
 
 				<!-- ############### Aufgabe1a Form2 Start -->
-				<form id="filter-form" action="/discovery" method="post">Filter
+				<form id="filter-form" action="/discovery" method="post">
 					<fieldset class="form-group">
-						<legend id="filterLegend">Filter by Searchterm</legend>
+						<legend class="legend" id="filterLegend">Filter by Searchterm</legend>
 						<input id="searchInput" maxlength="11" required type="text" placeholder="search term">
 						<input id="longDiscovery" type="hidden" value="0.0">
 						<input id="latDiscovery" type="hidden" value="0.0">
@@ -59,19 +59,19 @@
 					</fieldset>
 				</form>
 				<!-- ############### Aufgabe1a Form2 Ende -->
+				<div class="row">
+					<div  class="taglist col-4">
+						<ul id="results">
+							<li>Castle (49.01379, 8.404435) #sight</li>
+							<li>IWI (49.01379, 8.390071) #edu</li>
+						</ul>
+					</div>
 
-				<div class="taglist">
-					<ul id="results">
-						<li>Castle (49.01379, 8.404435) #sight</li>
-						<li>IWI (49.01379, 8.390071) #edu</li>
-					</ul>
+					<div class="fieldmap col-8">
+						<img id="result-img" src="./images/mapview.jpg" alt="a map with locations"/>
+						<div class="caption">Result map</div>
+					</div>
 				</div>
-
-				<div class="tagmap">
-					<img id="result-img" src="./images/mapview.jpg" alt="a map with locations"/>
-					<div class="caption">Result map</div>
-				</div>
-
 			</section>
 
 		</main>
