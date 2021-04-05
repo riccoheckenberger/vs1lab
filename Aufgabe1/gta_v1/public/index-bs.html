@@ -24,60 +24,84 @@
 			</div>
 		</header>
 
-		<main class="container">
+		<main class="container-fluid">
+			<div class="row">
+				<div class="col-sm-4 border border-end-0">
+					<div class="header text-center border border-top-0 mb-3">
+						<h2>Tagging</h2>
+					</div>
+					<section class="tagging border border-bottom-0">
 
-			<section class="tagging">
-				<h2>Tagging</h2>
 
-				<!-- ############### Aufgabe1a Form1 Start -->
-				<form id="tag-form" action="/tagging" method="post">
-					<fieldset class="scheduler-border">
-						<legend id="taggingLegend">Enter new Geo-Tag</legend>
-						<label for="latInput">latitude</label><br>
-							<input id="latInput" name="latitude" type="number" max="90" min="-90" placeholder="Ex: 45.12345" required step="any"/></br>
-						<label for="longInput">longitude</label><br>
-							<input id="longInput" name="longitude" type="number" max="180" min="-180" placeholder="Ex: -45.12345" required step="any"/></br>
-						<label for="nameInput">name</label><br>
-							<input id="nameInput" name="name" type="text" maxlength="10" placeholder="max: 10 letters" required/></br>
-						<label for="hashtagInput">hashtag</label><br>
-							<input id="hashtagInput" name="hashtag" type="text" maxlength="11" placeholder="# + max: 10 letters" pattern="#([a-z0-9]+)"/></br>
-						<input id="submitTagging" type="submit" value="submit" class="btn-default" />
-					</fieldset>
-				</form>
-				<!-- ############### Aufgabe1a Form1 Ende -->
+						<!-- ############### Aufgabe1a Form1 Start -->
+						<form id="tag-form" action="/tagging" method="post">
+							<fieldset class="scheduler-border">
+								<legend id="taggingLegend">Enter new Geo-Tag</legend>
+								<div class="mb-3">
+									<label for="latInput" class="form-label">latitude</label>
+									<input class="form-control" id="latInput" name="latitude" type="number" max="90" min="-90" placeholder="Ex: 45.12345" required step="any"/>
+								</div>
+								<div class="mb-3">
+									<label for="longInput" class="form-label">longitude</label>
+									<input class="form-control" id="longInput" name="longitude" type="number" max="180" min="-180" placeholder="Ex: -45.12345" required step="any"/>
+								</div>
+								<div class="mb-3">
+									<label class="form-label" for="nameInput">name</label>
+									<input class="form-control" id="nameInput" name="name" type="text" maxlength="10" placeholder="max: 10 letters" required/>
+								</div>
+								<div class="mb-3">
+									<label for="hashtagInput" class="form-label">hashtag</label>
+									<input class="form-control" id="hashtagInput" name="hashtag" type="text" maxlength="11" placeholder="# + max: 10 letters" pattern="#([a-z0-9]+)"/>
+								</div>
+								<input id="submitTagging" type="submit" value="submit" class="btn-default" />
+							</fieldset>
+						</form>
+						<!-- ############### Aufgabe1a Form1 Ende -->
 
-			</section>
-
-			<section class="discovery">
-				<h2>Discovery</h2>
-
-				<!-- ############### Aufgabe1a Form2 Start -->
-				<form id="filter-form" action="/discovery" method="post">Filter
-					<fieldset class="form-group">
-						<legend id="filterLegend">Filter by Searchterm</legend>
-						<input id="searchInput" maxlength="11" required type="text" placeholder="search term">
-						<input id="longDiscovery" type="hidden" value="0.0">
-						<input id="latDiscovery" type="hidden" value="0.0">
-						<input id="submitDiscovery" type="submit" value="apply" class="bg-info">
-
-					</fieldset>
-				</form>
-				<!-- ############### Aufgabe1a Form2 Ende -->
-
-				<div class="taglist">
-					<ul id="results">
-						<li>Castle (49.01379, 8.404435) #sight</li>
-						<li>IWI (49.01379, 8.390071) #edu</li>
-					</ul>
+					</section>
 				</div>
+				<div class="col-lg-8 border"> <!--Discovery-->
 
-				<div class="tagmap">
-					<img id="result-img" src="./images/mapview.jpg" alt="a map with locations"/>
-					<div class="caption">Result map</div>
+					<div class="header text-center border border-top-0 mb-3">
+						<h2>Discovery</h2>
+					</div>
+					<div class="border container-fluid">
+						<section class="row">
+
+							<div class="col-5">
+
+								<!-- ############### Aufgabe1a Form2 Start -->
+								<form id="filter-form" action="/discovery" method="post">
+									<fieldset class="form-group">
+										<legend id="filterLegend">Filter by Searchterm</legend>
+										<div class="form-floating mb-3">
+											<input class="form-control" id="searchInput" maxlength="11" required type="text" placeholder="search term">
+											<label for="searchInput">seach term</label>
+										</div>
+
+										<input id="longDiscovery" type="hidden" value="0.0">
+										<input id="latDiscovery" type="hidden" value="0.0">
+										<input id="submitDiscovery" type="submit" value="apply" class="btn-default">
+
+									</fieldset>
+								</form>
+								<!-- ############### Aufgabe1a Form2 Ende -->
+
+								<div class="taglist"><br>
+									<ul id="results" class="list-group">
+										<li class="list-group-item">Castle (49.01379, 8.404435) #sight</li>
+										<li class="list-group-item">IWI (49.01379, 8.390071) #edu</li>
+									</ul>
+								</div>
+							</div>
+							<div class="tagmap col-xxl-7 border-start">
+								<img id="result-img" src="./images/mapview.jpg" alt="a map with locations"/>
+								<div class="caption">Result map</div>
+							</div>
+						</section>
+					</div>
 				</div>
-
-			</section>
-
+			</div>
 		</main>
 
 		<footer>
