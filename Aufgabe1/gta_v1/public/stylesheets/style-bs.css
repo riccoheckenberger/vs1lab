@@ -3,6 +3,13 @@ body {
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
-a {
-  color: #00B7FF;
+header {
+  background-color: grey;
+  color: white;
+  padding: 10px;
 }
+
+.tagging {
+  padding: 10px;
+}
+
