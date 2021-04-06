@@ -29,14 +29,19 @@
 				<form id="tag-form" action="/tagging" method="post">
 					<fieldset>
 						<legend class="legend" id="taggingLegend">Enter new Geo-Tag</legend>
-						<label for="latInput">latitude</label><br>
-						<input id="latInput" name="latitude" type="number" max="90" min="-90" placeholder="Ex: 45.12345" required step="any"/></br>
-						<label for="longInput">longitude</label><br>
-						<input id="longInput" name="longitude" type="number" max="180" min="-180" placeholder="Ex: -45.12345" required step="any"/></br>
-						<label for="nameInput">name</label><br>
-						<input id="nameInput" name="name" type="text" maxlength="10" placeholder="max: 10 letters" required/></br>
-						<label for="hashtagInput">hashtag</label><br>
-						<input id="hashtagInput" name="hashtag" type="text" maxlength="11" placeholder="# + max: 10 letters" pattern="#([a-z0-9]+)"/></br>
+
+						<label for="latInput">latitude</label>
+						<input id="latInput" name="latitude" type="number" max="90" min="-90" placeholder="Ex: 45.12345" required step="any"/>
+
+						<label for="longInput">longitude</label>
+						<input id="longInput" name="longitude" type="number" max="180" min="-180" placeholder="Ex: -45.12345" required step="any"/>
+
+						<label for="nameInput">name</label>
+						<input id="nameInput" name="name" type="text" maxlength="10" placeholder="max: 10 letters" required/>
+
+						<label for="hashtagInput">hashtag</label>
+						<input id="hashtagInput" name="hashtag" type="text" maxlength="11" placeholder="# + max: 10 letters" pattern="#([a-z0-9]+)"/>
+
 						<input id="submitTagging" type="submit" value="submit" class="btn-default" />
 					</fieldset>
 				</form>

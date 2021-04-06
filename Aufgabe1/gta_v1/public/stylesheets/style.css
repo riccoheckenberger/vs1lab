@@ -66,14 +66,17 @@
 }
 
 body {
+  background-color: #f9f9f9;
   padding: 50px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
-header {
+header, footer {
   background-color: grey;
   color: white;
+  border: 1px solid darkgray;
   padding: 10px;
+  text-align: center;
 }
 
 ul li  {
@@ -96,10 +99,14 @@ input {
   font-weight: bold;
 }
 
+#tag-form label, #submitTagging{
+  display:block;
+  margin-top: 10px;
+  margin-bottom: 2px;
+}
 
-footer {
-  position: sticky;
-  background-color: grey;
-  color: white;
-  padding: 10px;
+main {
+  border-left: 1px darkgray solid;
+  border-right: 1px darkgray solid;
+  background-color: white;
 }
