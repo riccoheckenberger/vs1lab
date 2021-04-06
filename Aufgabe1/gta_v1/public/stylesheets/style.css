@@ -110,3 +110,6 @@ main {
   border-right: 1px darkgray solid;
   background-color: white;
 }
+#result-img {
+  width: 100%;
+}
