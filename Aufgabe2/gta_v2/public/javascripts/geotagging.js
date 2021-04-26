@@ -12,7 +12,7 @@ console.log("The script is going to start...");
 
 // Hier wird die verwendete API für Geolocations gewählt
 // Die folgende Deklaration ist ein 'Mockup', das immer funktioniert und eine fixe Position liefert.
-GEOLOCATIONAPI = {
+/*GEOLOCATIONAPI = {
     getCurrentPosition: function(onsuccess) {
         onsuccess({
             "coords": {
@@ -27,7 +27,7 @@ GEOLOCATIONAPI = {
             "timestamp": 1540282332239
         });
     }
-};
+};*/
 
 // Die echte API ist diese.
 // Falls es damit Probleme gibt, kommentieren Sie die Zeile aus.
@@ -82,7 +82,7 @@ var gtaLocator = (function GtaLocator(geoLocationApi) {
     };
 
     // Hier API Key eintragen
-    var apiKey = "YOUR_API_KEY_HERE";
+    var apiKey = "1wnmq7jOXjBtxImOmEErcwwlIJn4zexV";
 
     /**
      * Funktion erzeugt eine URL, die auf die Karte verweist.
@@ -120,7 +120,17 @@ var gtaLocator = (function GtaLocator(geoLocationApi) {
         readme: "Dieses Objekt enthält 'öffentliche' Teile des Moduls.",
 
         updateLocation: function() {
-            // TODO Hier Inhalt der Funktion "update" ergänzen
+            tryLocate(function (position) {
+                var longitude =  getLongitude(position);
+                var latitude = getLatitude(position);
+                document.getElementById("latInput").value = latitude;
+                document.getElementById("longInput").value = longitude
+                document.getElementById("latDiscovery").setAttribute("value", latitude);
+                document.getElementById("longDiscovery").setAttribute("value", longitude);
+                document.getElementById("result-img").setAttribute("src", getLocationMapSrc(latitude, longitude, []));
+            }, function (msg) {
+                alert(msg);
+            });
         }
 
     }; // ... Ende öffentlicher Teil
@@ -132,6 +142,5 @@ var gtaLocator = (function GtaLocator(geoLocationApi) {
  * des Skripts.
  */
 $(function() {
-    alert("Please change the script 'geotagging.js'");
-    // TODO Hier den Aufruf für updateLocation einfügen
+    gtaLocator.updateLocation(GEOLOCATIONAPI);
 });
