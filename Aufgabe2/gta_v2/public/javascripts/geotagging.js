@@ -127,7 +127,7 @@ var gtaLocator = (function GtaLocator(geoLocationApi) {
                 document.getElementById("longInput").value = longitude
                 document.getElementById("latDiscovery").setAttribute("value", latitude);
                 document.getElementById("longDiscovery").setAttribute("value", longitude);
-                document.getElementById("result-img").setAttribute("src", getLocationMapSrc(latitude, longitude, []));
+                document.getElementById("result-img").setAttribute("src", getLocationMapSrc(latitude, longitude, [], 15));
             }, function (msg) {
                 alert(msg);
             });
