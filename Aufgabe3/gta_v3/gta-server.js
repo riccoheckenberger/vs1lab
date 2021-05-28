@@ -44,10 +44,10 @@ function geoTagObject(longitude, latitude, name, hashtag) {
 
     this.getParams = function() {
         return {
-            "longitude" : this.latitude,
-            "latitude" : this.latitude,
-            "name" : this.name,
-            "hashtag" : this.hashtag
+            longitude : this.latitude,
+            latitude : this.latitude,
+            name : this.name,
+            hashtag : this.hashtag
         }
     }
 }
