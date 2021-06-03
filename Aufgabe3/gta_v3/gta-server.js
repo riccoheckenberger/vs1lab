@@ -36,20 +36,11 @@ app.use(express.static(__dirname + "/public"));
  * GeoTag Objekte sollen min. alle Felder des 'tag-form' Formulars aufnehmen.
  */
 
-function geoTagObject(longitude, latitude, name, hashtag) {
+function GeoTagObject(longitude, latitude, name, hashtag) {
     this.longitude = longitude;
     this.latitude = latitude;
     this.name = name;
     this.hashtag = hashtag;
-
-    this.getParams = function() {
-        return {
-            longitude : this.latitude,
-            latitude : this.latitude,
-            name : this.name,
-            hashtag : this.hashtag
-        }
-    }
 }
 
 
@@ -68,23 +59,11 @@ var inMemory = (function() {
     //This function takes in latitude and longitude of two location and returns the distance between them as the crow flies (in km)
     function calcDistance(lat1, lon1, lat2, lon2)
     {
-        var R = 6371; // km
-        var dLat = toRad(lat2-lat1);
-        var dLon = toRad(lon2-lon1);
-        lat1 = toRad(lat1);
-        lat2 = toRad(lat2);
-
-        var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-            Math.sin(dLon/2) * Math.sin(dLon/2) * Math.cos(lat1) * Math.cos(lat2);
-        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        return R * c;
+        var lat = 111.3 * Math.abs(lat1 -lat2);
+        var lon = 71.5 * Math.abs(lon1-lon2);
+        return Math.sqrt((Math.pow(lat,2)) +(Math.pow(lon,2)));
     }
 
-    // Converts numeric degrees to radians
-    function toRad(Value)
-    {
-        return Value * Math.PI / 180;
-    }
 
     return {
         geotags: geotags,
@@ -93,15 +72,13 @@ var inMemory = (function() {
             var returnGeoTags = [];
             geotags.forEach(function(tempObject) {
                 if (tempObject !== undefined) {
-                    var params = tempObject.getParams();
-                    var paramLong = params.longitude;
-                    var paramLat = params.latitude;
+                    var paramLong = tempObject.longitude;
+                    var paramLat = tempObject.latitude;
                     if (calcDistance(paramLat, paramLong, tempLat, tempLong) <= radius) {
                         returnGeoTags.push(tempObject);
                     }
                 }
             });
-            console.log("search for GeoTags (Radius)")
             return returnGeoTags;
         },
 
@@ -171,9 +148,9 @@ app.get('/', function(req, res) {
  * Die Objekte liegen in einem Standard Radius um die Koordinate (lat, lon).
  */
 
-app.post("/tagging", function(req,res,next) {
+app.post("/tagging", function(req,res) {
     var body = req.body;
-    var newGeoTag = new geoTagObject(body.longitude, body.latitude, body.name, body.hashtag);
+    var newGeoTag = new GeoTagObject(body.longitude, body.latitude, body.name, body.hashtag);
     inMemory.addGeoTag(newGeoTag);
     var tempList = inMemory.searchRadios(body.myLong, body.myLat, stdRadius);
     var list = {
@@ -199,15 +176,16 @@ app.post("/tagging", function(req,res,next) {
  * Die Objekte liegen in einem Standard Radius um die Koordinate (lat, lon).
  * Falls 'term' vorhanden ist, wird nach Suchwort gefiltert.
  */
-var stdRadius = 5; //km
+var stdRadius = 1000; //km
 
-app.post("/discovery", function (req,res,next) {
+app.post("/discovery", function (req,res) {
     var body = req.body;
     var tempList;
-    if (body.term !== undefined ||  body.term !== "") {
+    if (body.term !== undefined &&  body.term !== "") {
         tempList = inMemory.searchTerm(body.term);
     } else {
         tempList = inMemory.searchRadios(body.myLong, body.myLat, stdRadius);
+        console.log("test radios")
     }
 
     var list = {
