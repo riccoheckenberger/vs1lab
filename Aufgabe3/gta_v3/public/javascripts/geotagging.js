@@ -133,7 +133,7 @@ var gtaLocator = (function GtaLocator(geoLocationApi) {
                     document.getElementById("myLatDiscovery").setAttribute("value", latitude);
                     document.getElementById("myLongDiscovery").setAttribute("value", longitude);
 
-                    document.getElementById("result-img").setAttribute("src", getLocationMapSrc(latitude, longitude, [], 15));
+                    document.getElementById("result-img").setAttribute("src", getLocationMapSrc(latitude, longitude, [], 2));
                 }, function (msg) {
                     alert(msg);
                 });

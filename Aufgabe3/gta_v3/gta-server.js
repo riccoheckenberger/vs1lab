@@ -175,7 +175,7 @@ app.post("/tagging", function(req,res,next) {
     var body = req.body;
     var newGeoTag = new geoTagObject(body.longitude, body.latitude, body.name, body.hashtag);
     inMemory.addGeoTag(newGeoTag);
-    var tempList = inMemory.searchRadios(body.longitude, body.latitude, stdRadius);
+    var tempList = inMemory.searchRadios(body.myLong, body.myLat, stdRadius);
     var list = {
         taglist: tempList,
         longitude: body.longitude,
