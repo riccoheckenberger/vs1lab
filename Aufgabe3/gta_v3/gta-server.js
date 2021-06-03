@@ -87,6 +87,8 @@ var inMemory = (function() {
     }
 
     return {
+        geotags: geotags,
+
         searchRadios : function (tempLong, tempLat, radius) {
             var returnGeoTags = [];
             geotags.forEach(function(tempObject) {
@@ -147,10 +149,12 @@ var inMemory = (function() {
 
 app.get('/', function(req, res) {
     res.render('gta', {
-        taglist: [],
+        taglist: inMemory.geotags,
         longitude: null,
         latitude: null,
-        jsonTagList : JSON.stringify([])
+        myLong : null,
+        myLat : null,
+        jsonTagList : JSON.stringify(inMemory.geotags)
     });
 });
 
@@ -172,11 +176,12 @@ app.post("/tagging", function(req,res,next) {
     var newGeoTag = new geoTagObject(body.longitude, body.latitude, body.name, body.hashtag);
     inMemory.addGeoTag(newGeoTag);
     var tempList = inMemory.searchRadios(body.longitude, body.latitude, stdRadius);
-
     var list = {
         taglist: tempList,
         longitude: body.longitude,
         latitude: body.latitude,
+        myLong : body.myLong,
+        myLat : body.myLat,
         jsonTagList : JSON.stringify(tempList)
     }
     console.log("return geoTagItems")
@@ -202,13 +207,15 @@ app.post("/discovery", function (req,res,next) {
     if (body.term !== undefined ||  body.term !== "") {
         tempList = inMemory.searchTerm(body.term);
     } else {
-        tempList = inMemory.searchRadios(body.longitude, body.latitude, stdRadius);
+        tempList = inMemory.searchRadios(body.myLong, body.myLat, stdRadius);
     }
 
     var list = {
         taglist: tempList,
         longitude: body.longitude,
         latitude: body.latitude,
+        myLong : body.myLong,
+        myLat : body.myLat,
         jsonTagList : JSON.stringify(tempList)
     }
     console.log("return geoTagItems")

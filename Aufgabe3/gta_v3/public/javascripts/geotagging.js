@@ -120,14 +120,19 @@ var gtaLocator = (function GtaLocator(geoLocationApi) {
         readme: "Dieses Objekt enthält 'öffentliche' Teile des Moduls.",
 
         updateLocation: function() {
-            if (document.getElementById("latDiscovery").value === "" &&  document.getElementById("longDiscovery").value === "") {
+            if (document.getElementById("myLongTagging").value === "" &&  document.getElementById("myLatTagging").value === "") {
                 tryLocate(function (position) {
                     var longitude =  getLongitude(position);
                     var latitude = getLatitude(position);
-                    document.getElementById("latInput").value = latitude;
-                    document.getElementById("longInput").value = longitude
-                    document.getElementById("latDiscovery").setAttribute("value", latitude);
-                    document.getElementById("longDiscovery").setAttribute("value", longitude);
+                    document.getElementById("latInput").setAttribute("value", latitude);
+                    document.getElementById("longInput").setAttribute("value", longitude);
+
+                    document.getElementById("myLatTagging").setAttribute("value", latitude);
+                    document.getElementById("myLongTagging").setAttribute("value", longitude);
+
+                    document.getElementById("myLatDiscovery").setAttribute("value", latitude);
+                    document.getElementById("myLongDiscovery").setAttribute("value", longitude);
+
                     document.getElementById("result-img").setAttribute("src", getLocationMapSrc(latitude, longitude, [], 15));
                 }, function (msg) {
                     alert(msg);
@@ -135,8 +140,8 @@ var gtaLocator = (function GtaLocator(geoLocationApi) {
             } else {
                 var taglist_json = document.getElementById("result-img").getAttribute("data-tags");
                 var taglist = JSON.parse(taglist_json);
-                var lat = document.getElementById("latDiscovery").value;
-                var long = document.getElementById("longDiscovery").value;
+                var lat = document.getElementById("myLatDiscovery").value;
+                var long = document.getElementById("myLongDiscovery").value;
                 document.getElementById("result-img").setAttribute("src", getLocationMapSrc(lat, long, taglist, 15));
             }
         }
