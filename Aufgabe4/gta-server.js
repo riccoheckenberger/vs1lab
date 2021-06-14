@@ -97,25 +97,27 @@ var geoTagModul = (function() {
         },
 
         removeGeoTag : function (id) {
-            geotags.filter(function (geotag){
+            let filteredGeotags = geotags.filter(function (geotag){
                 return geotag.id != id;
             });
+            this.geotags = filteredGeotags;
         },
 
         getGeoTagById: function(id) {
-            return geotags.filter(function(geoTag) {
+            let searchedGeoTags = geotags.filter(function(geoTag) {
                 return geoTag.id === id;
-            })[0];
+            });
+            return searchedGeoTags[0];
         },
 
         changeGeoTag: function(toChangeGeoTag, id) {
             var i;
             for (i = 0; i < geotags.length; i++) {
-                if (geoTags[i].id === id) {
-                    geoTags[i].name = toChangeGeoTag.name;
-                    geoTags[i].latitude = toChangeGeoTag.latitude;
-                    geoTags[i].longitude = toChangeGeoTag.longitude;
-                    geoTags[i].hashtag = toChangeGeoTag.hashtag;
+                if (geotags[i].id === id) {
+                    geotags[i].name = toChangeGeoTag.name;
+                    geotags[i].latitude = toChangeGeoTag.latitude;
+                    geotags[i].longitude = toChangeGeoTag.longitude;
+                    geotags[i].hashtag = toChangeGeoTag.hashtag;
                 }
             }
         }
@@ -193,7 +195,6 @@ app.post("/geotags", async function (req, res) {
     var newGeoTag = new geoTagObject(body.longitude, body.latitude, body.name, body.hashtag, body.id);
     geoTagModul.addGeoTag(newGeoTag);
 
-
     var list = {
         taglist: geoTagModul.geotags,
         longitude: body.longitude,
@@ -217,7 +218,11 @@ app.get("/geotags", async function (req, res) {
 
     var tempList;
     if (searchTerm === undefined || searchTerm === "") {
-        tempList = geoTagModul.searchByCoordinates(myLong, myLat, stdRadius)
+        if (searchTerm === undefined) {
+            tempList = geoTagModul.geotags;
+        } else {
+            tempList = geoTagModul.searchByCoordinates(myLong, myLat, stdRadius);
+        }
     } else {
         tempList = geoTagModul.searchTerm(searchTerm);
     }
@@ -234,26 +239,28 @@ app.get("/geotags", async function (req, res) {
 
 // 3. Route Lesen -> GET
 
-app.get("/geotags/{id}", async function (req, res) {
-    var id = req.id;
-    res.send(geoTagModul.getGeoTagById(parseInt(id)));
+app.get("/geotags/:id", async function (req, res) {
+    var id = req.params.id;
+    console.log(id);
+    res.send(geoTagModul.getGeoTagById(id));
 });
 
 
 // 4. Route Ändern -> PUT
 
-app.put("/geotags/id", async function (req, res) {
-    var id = req.id;
+app.put("/geotags/:id", async function (req, res) {
+    var id = req.params.id;
     var body = req.body;
-    var toChangeGeoTag = new geoTagObject(body.longitude, body.latitude, body.name, body.hashtag, body.id);
+    var toChangeGeoTag = new geoTagObject(body.longitude, body.latitude, body.name, body.hashtag, id);
     geoTagModul.changeGeoTag(toChangeGeoTag, id);
     res.send(toChangeGeoTag);
 });
 
 // 5. Route Löschen -> DELTE
-app.delete("/geotags/{id}", async function (req, res) {
-    var id = req.id;
-    res.send(geoTagModul.removeGeoTag(parseInt(id)));
+app.delete("/geotags/:id", async function (req, res) {
+    var id = req.params.id;
+    geoTagModul.removeGeoTag(id);
+    res.send(id+" was deleted.");
 });
 
 
