@@ -32,8 +32,7 @@ function geoTagObject(longitude, latitude, name, hashtag) {
     this.latitude = latitude;
     this.name = name;
     this.hashtag = hashtag;
-
-    }
+}
 
 
 /**
@@ -122,10 +121,10 @@ app.get('/', function(req, res) {
  * Route mit Pfad '/tagging' für HTTP 'POST' Requests.
  */
 
-app.post("/tagging", function (req, res) {
+app.post("/geotags", function (req, res) {
     var body = req.body;
-    var newGeoTag = new geoTagObject(body.longitude, body.latitude, body.name, body.hashtag);
-    geoTagModul.addGeoTag(newGeoTag);
+    console.log(JSON.parse(body.geotag));
+    geoTagModul.addGeoTag(JSON.parse(body.geotag));
 
     var list = {
         taglist: geoTagModul.geotags,
@@ -134,8 +133,7 @@ app.post("/tagging", function (req, res) {
         myLong: body.myLong,
         myLat: body.myLat
     }
-    console.log("return geoTagItems")
-    res.render('gta', list);
+    res.json(list);
 });
 
 
@@ -146,8 +144,8 @@ app.post("/tagging", function (req, res) {
 
 var stdRadius = 100; //km
 
-app.post("/discovery", function (req,res) {
-    var body = req.body;
+app.get("/geotags", function (req,res) {
+    var body = req.params;
     var tempList;
     if (body.term === undefined ||  body.term === "") {
         tempList = geoTagModul.searchByCoordinates(body.myLong,body.myLat,stdRadius)
@@ -165,9 +163,25 @@ app.post("/discovery", function (req,res) {
     }
 
     console.log("return geoTagItems")
-    res.render('gta', list);
+    res.json(list);
 });
 
+/**
+ * URI geotags/<id>
+ * @type {number}
+ */
+
+app.get ("/geotags/:id", function (req, res) {
+
+});
+
+app.post("/geotags/:id", function (req, res) {
+
+});
+
+app.put("/geotags/:id", function (req, res) {
+
+});
 
 var port = 3000;
 app.set('port', port);
