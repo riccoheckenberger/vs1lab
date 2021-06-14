@@ -23,11 +23,18 @@ console.log("The script is going to start...");
     }
 };*/
 
-function GeoTagObject(longitude, latitude, name, hashtag) {
+function getId() {
+    return Date.now().toString(36) + Math.random().toString(36).substr(2);
+}
+
+function GeoTagObject(longitude, latitude, name, hashtag, myLat, mylong) {
     this.longitude = longitude;
     this.latitude = latitude;
     this.name = name;
     this.hashtag = hashtag;
+    this.myLat = myLat;
+    this.myLong = mylong;
+    this.id = getId();
 }
 
 // Die echte API ist diese.
@@ -99,6 +106,7 @@ var gtaLocator = (function GtaLocator(geoLocationApi) {
 
         var tagList = "&pois=You," + lat + "," + lon;
         if (tags !== undefined) tags.forEach(function(tag) {
+            if(tag.name && tag.latitude && tag.longitude)
             tagList += "|" + tag.name + "," + tag.latitude + "," + tag.longitude;
         });
 
@@ -150,22 +158,40 @@ var gtaLocator = (function GtaLocator(geoLocationApi) {
             event.preventDefault();
 
             var ajax = new XMLHttpRequest();
+            ajax.open("POST", "/geotags", true);
+
             ajax.onreadystatechange = function () {
                 if(ajax.readyState == 4) {
-                    this.updateLocation();
+                    console.log("heeeeere", ajax);
+                    var json = ajax.response;
+                    var module = (JSON.parse(json));
+                    var geotags = module.taglist;
+                    var html = [];
+                    console.log(geotags);
+                    geotags.forEach(function(gtag){
+                        html.push(`<li>${gtag.name} (${gtag.latitude}, ${gtag.longitude}) ${gtag.hashtag}</li>`);
+                    });
+                    document.getElementById("results").innerHTML = html.join("");
+                    document.getElementById("result-img").setAttribute("src", getLocationMapSrc(module.myLat, module.myLong, geotags, 5));
                 }
             }
             var longitude = document.getElementById("longInput").value;
             var latitude = document.getElementById("latInput").value;
             var name = document.getElementById("nameInput").value;
             var hashtag = document.getElementById("hashtagInput").value;
+            var myLong = document.getElementById("myLongTagging").value
+            var myLat = document.getElementById("myLatTagging").value
 
-            var geotagObject = GeoTagObject(longitude, latitude, name, hashtag);
+            var geotagObject = new GeoTagObject(longitude, latitude, name, hashtag, myLat, myLong);
 
             // send cotent with POST
-            ajax.overrideMimeType("JSON");
-            ajax.open("POST", "http://localhost:3000/", true);
-            ajax.send(Json.parse(geotagObject));
+            ajax.setRequestHeader("Content-Type", "application/json");
+
+
+
+            console.log("seding...", geotagObject);
+            ajax.send(JSON.stringify(geotagObject));
+
         },
 
         geoTagsFitlered: function(event) {
@@ -175,14 +201,27 @@ var gtaLocator = (function GtaLocator(geoLocationApi) {
             var ajax = new XMLHttpRequest();
             ajax.onreadystatechange = function () {
                 if(ajax.readyState == 4) {
-                    this.updateLocation();
+                    console.log("heeeeere", ajax);
+                    var json = ajax.response;
+                    var module = JSON.parse(json);
+                    var geotags = module.taglist;
+                    var html = [];
+                    console.log(geotags);
+                    geotags.forEach(function(gtag){
+                        html.push(`<li>${gtag.name} (${gtag.latitude}, ${gtag.longitude}) ${gtag.hashtag}</li>`);
+                    });
+                    document.getElementById("results").innerHTML = html.join("");
+                    document.getElementById("result-img").setAttribute("src", getLocationMapSrc(module.myLat, module.myLong, geotags, 5))
                 }
             }
             var searchTerm = document.getElementById("searchInput").value;
 
             // send searchTerm with GET
-            ajax.open("GET", "http://localhost:3000/?searchterm="+searchTerm, true);
-            ajax.send(null);
+
+            var myLong = document.getElementById("myLongTagging").value
+            var myLat = document.getElementById("myLatTagging").value
+            ajax.open("GET", "/geotags?searchterm="+searchTerm+"&myLat="+myLat+"&myLong="+myLong, true);
+            ajax.send();
         }
     }; // ... Ende öffentlicher Teil
 })(GEOLOCATIONAPI);
