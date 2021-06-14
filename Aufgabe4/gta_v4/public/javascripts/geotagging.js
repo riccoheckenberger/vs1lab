@@ -4,6 +4,52 @@
  */
 console.log("The script is going to start...");
 
+const ajax = new XMLHttpRequest();
+
+function checkRequired(formID) {
+    let bool = true;
+    document.getElementById(formID).querySelectorAll("[required]").forEach(function (item) {
+        if (item.value.length === 0) bool = false;
+    });
+    return bool;
+}
+
+document.getElementById("submitTagging").addEventListener("click",function (event) {
+    if  (checkRequired("tag-form")) {
+        //DOM objects
+        const latInput = document.getElementById("latInput");
+        const longInput = document.getElementById("longInput");
+        const myLong = document.getElementById("myLongTagging");
+        const myLat = document.getElementById("myLatTagging");
+        const nameInput = document.getElementById("nameInput");
+        const hashtagInput = document.getElementById("hashtagInput");
+        //create body
+        let body = "latitude=" + latInput.value + "&longitude=" + longInput.value + "&myLong=" + myLong.value + "&myLat=" + myLat.value + "&name=" + nameInput.value;
+        body += (hashtagInput.value !== "") ? "&hashtag=" + hashtagInput.value : "";
+        //Ajax Post request
+        ajax.open("POST", "/tagging", true);
+        ajax.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+        ajax.send(body);
+        event.preventDefault()
+    }
+
+});
+
+document.getElementById("filter-form").addEventListener("click",function (event) {
+    if (checkRequired("filter-form")) {
+        //DOM objects
+        const myLong = document.getElementById("myLongDiscovery");
+        const myLat = document.getElementById("myLatDiscovery");
+        const searchInput = document.getElementById("searchInput");
+        //create body
+        let body = (searchInput.value === "" ? "" : "term=" + searchInput.value + "&") + "myLong=" + myLong.value + "&myLat=" + myLat.value;
+        //ajax post request
+        ajax.open("GET", "/discovery?" + body);
+        ajax.send(null);
+        event.preventDefault()
+    }
+});
+
 
 // Mock-Up
 /*GEOLOCATIONAPI = {
@@ -137,6 +183,8 @@ var gtaLocator = (function GtaLocator(geoLocationApi) {
 
     }; // ... Ende öffentlicher Teil
 })(GEOLOCATIONAPI);
+
+
 
 /**
  * $(function(){...}) wartet, bis der DOM fertig aufgebaut wurde. Dann wird die
