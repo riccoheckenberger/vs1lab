@@ -4,8 +4,29 @@
  */
 console.log("The script is going to start...");
 
+/**
+ * Geotag Constructor
+ */
+function GeoTagObject(longitude, latitude, name, hashtag) {
+    this.longitude = longitude;
+    this.latitude = latitude;
+    this.name = name;
+    this.hashtag = hashtag;
+}
+
+
+/**
+ * creates ajax object
+ * @type {XMLHttpRequest}
+ */
 const ajax = new XMLHttpRequest();
 
+
+/**
+ * checks if all required form fields are filled
+ * @param formID
+ * @returns {boolean}
+ */
 function checkRequired(formID) {
     let bool = true;
     document.getElementById(formID).querySelectorAll("[required]").forEach(function (item) {
@@ -19,17 +40,14 @@ document.getElementById("submitTagging").addEventListener("click",function (even
         //DOM objects
         const latInput = document.getElementById("latInput");
         const longInput = document.getElementById("longInput");
-        const myLong = document.getElementById("myLongTagging");
-        const myLat = document.getElementById("myLatTagging");
         const nameInput = document.getElementById("nameInput");
         const hashtagInput = document.getElementById("hashtagInput");
         //create body
-        let body = "latitude=" + latInput.value + "&longitude=" + longInput.value + "&myLong=" + myLong.value + "&myLat=" + myLat.value + "&name=" + nameInput.value;
-        body += (hashtagInput.value !== "") ? "&hashtag=" + hashtagInput.value : "";
+        let geotag = new GeoTagObject(longInput.value, latInput.value, nameInput.value, hashtagInput.value);
         //Ajax Post request
-        ajax.open("POST", "/tagging", true);
+        ajax.open("POST", "/geotags", true);
         ajax.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-        ajax.send(body);
+        ajax.send("geotag=" + JSON.stringify(geotag));
         event.preventDefault()
     }
 
@@ -44,7 +62,7 @@ document.getElementById("filter-form").addEventListener("click",function (event)
         //create body
         let body = (searchInput.value === "" ? "" : "term=" + searchInput.value + "&") + "myLong=" + myLong.value + "&myLat=" + myLat.value;
         //ajax post request
-        ajax.open("GET", "/discovery?" + body);
+        ajax.open("GET", "/geotags?" + body);
         ajax.send(null);
         event.preventDefault()
     }
@@ -157,6 +175,7 @@ var gtaLocator = (function GtaLocator(geoLocationApi) {
         updateLocation: function() {
             var taglist_json = document.getElementById("result-img").getAttribute("data-tags");
             var taglist = JSON.parse(taglist_json);
+            //TODO
             if (document.getElementById("myLongTagging").value === "" &&  document.getElementById("myLatTagging").value === "") {
                 tryLocate(function (position) {
                     var longitude =  getLongitude(position);
