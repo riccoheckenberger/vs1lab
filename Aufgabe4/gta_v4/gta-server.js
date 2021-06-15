@@ -93,13 +93,7 @@ var geoTagModul = (function() {
 
 
 app.get('/', function(req, res) {
-    res.render('gta', {
-        taglist: geoTagModul.geotags,
-        longitude : "",
-        latitude: "",
-        myLong: "",
-        myLat: ""
-    });
+    res.render('gta');
 });
 
 
@@ -121,7 +115,7 @@ app.post("/geotags", function (req, res) {
  */
 
 app.get("/geotags", function (req,res) {
-    let body = req.params;
+    let body = req.query;
     let tempList;
     //Route 1: search for name
     if (body.term !== undefined &&  body.term !== "") {

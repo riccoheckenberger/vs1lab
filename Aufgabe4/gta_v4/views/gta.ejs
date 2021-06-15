@@ -31,13 +31,10 @@
                 <legend class="legend" id="taggingLegend">Enter new Geo-Tag</legend>
 
                 <label for="latInput">latitude</label>
-                <input id="latInput" name="latitude" type="number" max="90" min="-90" placeholder="Ex: 45.12345" required step="any" value="<%= latitude _%>"/>
+                <input id="latInput" name="latitude" type="number" max="90" min="-90" placeholder="Ex: 45.12345" required step="any" value=""/>
 
                 <label for="longInput">longitude</label>
-                <input id="longInput" name="longitude" type="number" max="180" min="-180" placeholder="Ex: -45.12345" required step="any" value="<%= longitude _%>"/>
-
-                <input name="myLong" id="myLongTagging" type="hidden" value="<%= myLong _%>">
-                <input name="myLat" id="myLatTagging" type="hidden" value="<%= myLat _%>">
+                <input id="longInput" name="longitude" type="number" max="180" min="-180" placeholder="Ex: -45.12345" required step="any" value=""/>
 
                 <label for="nameInput">name</label>
                 <input id="nameInput" name="name" type="text" maxlength="10" placeholder="max: 10 letters" required/>
@@ -60,8 +57,8 @@
             <fieldset class="form-group">
                 <legend class="legend" id="filterLegend">Filter by Searchterm</legend>
                 <input name="term" id="searchInput" maxlength="11" type="text" placeholder="search term">
-                <input name="myLong" id="myLongDiscovery" type="hidden" value="<%= myLong _%>">
-                <input name="myLat" id="myLatDiscovery" type="hidden" value="<%= myLat _%>">
+                <input name="myLong" id="myLongDiscovery" type="hidden" value="">
+                <input name="myLat" id="myLatDiscovery" type="hidden" value="">
                 <input id="submitDiscovery" type="submit" value="apply">
 
             </fieldset>
@@ -69,15 +66,11 @@
         <!-- ############### Aufgabe1a Form2 Ende -->
         <div class="row">
             <div  class="taglist col-4">
-                <ul id="results">
-                    <% if (taglist !== undefined) taglist.forEach(function(gtag) { %>
-                        <li><%= gtag.name %> ( <%= gtag.latitude %>,<%= gtag.longitude %>) <%= gtag.hashtag %> </li>
-                    <% }); %>
-                </ul>
+                <ul id="results"></ul>
             </div>
 
             <div class="fieldmap col-8">
-                <img id="result-img" src="./images/mapview.jpg" alt="a map with locations" data-tags="<%= JSON.stringify(taglist) _%>"/>
+                <img id="result-img" src="./images/mapview.jpg" alt="a map with locations"/>
                 <div class="caption">Result map</div>
             </div>
         </div>

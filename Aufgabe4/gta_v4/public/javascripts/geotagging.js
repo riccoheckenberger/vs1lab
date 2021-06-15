@@ -21,6 +21,16 @@ function GeoTagObject(longitude, latitude, name, hashtag) {
  */
 const ajax = new XMLHttpRequest();
 
+/**
+ * ajax response listener
+ */
+
+ajax.onreadystatechange = function() {
+    if (ajax.readyState === 4) {
+        console.log(JSON.parse(ajax.responseText));
+        gtaLocator.updateLocation(JSON.parse(ajax.responseText));
+    }
+};
 
 /**
  * checks if all required form fields are filled
@@ -48,10 +58,12 @@ document.getElementById("submitTagging").addEventListener("click",function (even
         ajax.open("POST", "/geotags", true);
         ajax.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
         ajax.send("geotag=" + JSON.stringify(geotag));
-        event.preventDefault()
+        event.preventDefault();
     }
 
 });
+
+const RADIUS = 100; //km
 
 document.getElementById("filter-form").addEventListener("click",function (event) {
     if (checkRequired("filter-form")) {
@@ -60,11 +72,11 @@ document.getElementById("filter-form").addEventListener("click",function (event)
         const myLat = document.getElementById("myLatDiscovery");
         const searchInput = document.getElementById("searchInput");
         //create body
-        let body = (searchInput.value === "" ? "" : "term=" + searchInput.value + "&") + "myLong=" + myLong.value + "&myLat=" + myLat.value;
+        let body = (searchInput.value === "" ?  "radius=" + RADIUS : "term=" + searchInput.value ) + "&myLong=" + myLong.value + "&myLat=" + myLat.value ;
         //ajax post request
         ajax.open("GET", "/geotags?" + body);
         ajax.send(null);
-        event.preventDefault()
+        event.preventDefault();
     }
 });
 
@@ -172,20 +184,14 @@ var gtaLocator = (function GtaLocator(geoLocationApi) {
 
         readme: "Dieses Objekt enthält 'öffentliche' Teile des Moduls.",
 
-        updateLocation: function() {
-            var taglist_json = document.getElementById("result-img").getAttribute("data-tags");
-            var taglist = JSON.parse(taglist_json);
-            //TODO
-            if (document.getElementById("myLongTagging").value === "" &&  document.getElementById("myLatTagging").value === "") {
+        updateLocation: function(taglist) {
+            if (document.getElementById("myLongDiscovery").value === "" &&  document.getElementById("myLatDiscovery").value === "") {
                 tryLocate(function (position) {
-                    var longitude =  getLongitude(position);
-                    var latitude = getLatitude(position);
+                    let longitude =  getLongitude(position);
+                    let latitude = getLatitude(position);
+
                     document.getElementById("latInput").setAttribute("value", latitude);
                     document.getElementById("longInput").setAttribute("value", longitude);
-
-                    document.getElementById("myLatTagging").setAttribute("value", latitude);
-                    document.getElementById("myLongTagging").setAttribute("value", longitude);
-
                     document.getElementById("myLatDiscovery").setAttribute("value", latitude);
                     document.getElementById("myLongDiscovery").setAttribute("value", longitude);
 
@@ -194,8 +200,8 @@ var gtaLocator = (function GtaLocator(geoLocationApi) {
                     alert(msg);
                 });
             } else {
-                var lat = document.getElementById("myLatDiscovery").value;
-                var long = document.getElementById("myLongDiscovery").value;
+                let lat = document.getElementById("myLatDiscovery").value;
+                let long = document.getElementById("myLongDiscovery").value;
                 document.getElementById("result-img").setAttribute("src", getLocationMapSrc(lat, long, taglist, 5));
             }
         }
@@ -210,5 +216,6 @@ var gtaLocator = (function GtaLocator(geoLocationApi) {
  * angegebene Funktion aufgerufen.
  */
 $(function() {
-    gtaLocator.updateLocation(GEOLOCATIONAPI);
+    ajax.open("GET", "/geotags", true);
+    ajax.send(null);
 });
