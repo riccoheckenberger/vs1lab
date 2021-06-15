@@ -39,8 +39,8 @@ ajax.onreadystatechange = function() {
  */
 function checkRequired(formID) {
     let bool = true;
-    document.getElementById(formID).querySelectorAll("[required]").forEach(function (item) {
-        if (item.value.length === 0) bool = false;
+    document.getElementById(formID).querySelectorAll("input").forEach(function (item) {
+        if (!item.checkValidity()) bool = false;
     });
     return bool;
 }
