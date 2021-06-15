@@ -232,6 +232,10 @@ var gtaLocator = (function GtaLocator(geoLocationApi) {
     }; // ... Ende öffentlicher Teil
 })(GEOLOCATIONAPI);
 
+/**
+ * update <ul> list with taglist elements
+ * @param taglist
+ */
 
 function updateList(taglist) {
     let ul = document.getElementById("results");
