@@ -71,7 +71,7 @@ document.getElementById("submitTagging").addEventListener("click",function (even
  * @type {number}
  */
 
-const RADIUS = 100; //km
+const RADIUS = 500; //km
 
 document.getElementById("submitDiscovery").addEventListener("click",function (event) {
     if (checkRequired("filter-form")) {
@@ -222,9 +222,9 @@ var gtaLocator = (function GtaLocator(geoLocationApi) {
 function updateList(taglist) {
     let ul = document.getElementById("results");
     //remove all children
-    ul.childNodes.forEach(function (item){
-        item.remove();
-    });
+    while (ul.lastElementChild) {
+        ul.removeChild(ul.lastElementChild);
+    }
     //add new children
     taglist.forEach(function(item){
         let li = document.createElement("li");
