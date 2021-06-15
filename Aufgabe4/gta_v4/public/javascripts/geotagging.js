@@ -37,7 +37,7 @@ ajax.onreadystatechange = function() {
  * @param formID
  * @returns {boolean}
  */
-function checkRequired(formID) {
+function checkValidity(formID) {
     let bool = true;
     document.getElementById(formID).querySelectorAll("input").forEach(function (item) {
         if (!item.checkValidity()) bool = false;
@@ -49,7 +49,7 @@ function checkRequired(formID) {
  * click listener for tag-form
  */
 document.getElementById("submitTagging").addEventListener("click",function (event) {
-    if  (checkRequired("tag-form")) {
+    if  (checkValidity("tag-form")) {
         //DOM objects
         const latInput = document.getElementById("latInput");
         const longInput = document.getElementById("longInput");
@@ -74,13 +74,27 @@ document.getElementById("submitTagging").addEventListener("click",function (even
 const RADIUS = 500; //km
 
 document.getElementById("submitDiscovery").addEventListener("click",function (event) {
-    if (checkRequired("filter-form")) {
+    if (checkValidity("filter-form")) {
         //DOM objects
         const myLong = document.getElementById("myLongDiscovery");
         const myLat = document.getElementById("myLatDiscovery");
         const searchInput = document.getElementById("searchInput");
         //create body
-        let body = (searchInput.value === "" ?  "radius=" + RADIUS : "term=" + searchInput.value ) + "&myLong=" + myLong.value + "&myLat=" + myLat.value ;
+
+        //radius or term
+        let body;
+        if (searchInput.value === "") {
+            body = "radius=" + RADIUS;
+        } else {
+            //if search by # use %23 as #
+            body = "term="
+            if (searchInput.value.substring(0,1) === "#"){
+                body += "%23" + searchInput.value.substring(1);
+            } else {
+                body += searchInput.value;
+            }
+        }
+        body += "&myLong=" + myLong.value + "&myLat=" + myLat.value ;
         //ajax post request
         ajax.open("GET", "/geotags?" + body);
         ajax.send(null);
