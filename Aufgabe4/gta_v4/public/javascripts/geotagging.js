@@ -45,6 +45,9 @@ function checkRequired(formID) {
     return bool;
 }
 
+/**
+ * click listener for tag-form
+ */
 document.getElementById("submitTagging").addEventListener("click",function (event) {
     if  (checkRequired("tag-form")) {
         //DOM objects
@@ -63,9 +66,14 @@ document.getElementById("submitTagging").addEventListener("click",function (even
 
 });
 
+/**
+ * click listener for filter-form
+ * @type {number}
+ */
+
 const RADIUS = 100; //km
 
-document.getElementById("filter-form").addEventListener("click",function (event) {
+document.getElementById("submitDiscovery").addEventListener("click",function (event) {
     if (checkRequired("filter-form")) {
         //DOM objects
         const myLong = document.getElementById("myLongDiscovery");
@@ -204,11 +212,26 @@ var gtaLocator = (function GtaLocator(geoLocationApi) {
                 let long = document.getElementById("myLongDiscovery").value;
                 document.getElementById("result-img").setAttribute("src", getLocationMapSrc(lat, long, taglist, 5));
             }
+            updateList(taglist);
         }
 
     }; // ... Ende öffentlicher Teil
 })(GEOLOCATIONAPI);
 
+
+function updateList(taglist) {
+    let ul = document.getElementById("results");
+    //remove all children
+    ul.childNodes.forEach(function (item){
+        item.remove();
+    });
+    //add new children
+    taglist.forEach(function(item){
+        let li = document.createElement("li");
+        li.innerText = item.name + " (" + item.latitude + ", " + item.longitude + ") " + item.hashtag;
+        ul.appendChild(li);
+    });
+}
 
 
 /**
