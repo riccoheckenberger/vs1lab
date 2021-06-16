@@ -5,7 +5,7 @@
 console.log("The script is going to start...");
 
 var ajax = new XMLHttpRequest();
-const radius = 10000;
+const radius = 500;
 
 ajax.onreadystatechange = function() {
     if (ajax.readyState === 4) {
@@ -40,7 +40,7 @@ document.getElementById("submitTagging").addEventListener("click", function (eve
         const nameInput = document.getElementById("nameInput");
         const hashtagInput = document.getElementById("hashtagInput");
 
-    const geotag = new geoTagObject (latInput.value,longInput.value,nameInput.value,hashtagInput.value);
+    const geotag = new geoTagObject (longInput.value,latInput.value,nameInput.value,hashtagInput.value);
     ajax.open("POST","/geotags",true);
     // setRequestHeader method posts data like an HTML form
     ajax.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
