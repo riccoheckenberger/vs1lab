@@ -143,5 +143,5 @@ var gtaLocator = (function GtaLocator(geoLocationApi) {
  * angegebene Funktion aufgerufen.
  */
 $(function() {
-    gtaLocator.updateLocation(GEOLOCATIONAPI);
+    gtaLocator.updateLocation();
 });
