@@ -79,7 +79,7 @@ header, footer, .caption {
   text-align: center;
 }
 
-ul li  {
+ul li, .nav  {
   list-style-type: none;
   margin-bottom: 5px;
   padding: 7px;
@@ -112,4 +112,12 @@ main {
 }
 #result-img {
   width: 100%;
+}
+
+#pageNavigation {
+  text-align: center;
+}
+
+#secondPage {
+  color: black;
 }

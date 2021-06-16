@@ -27,8 +27,10 @@ const ajax = new XMLHttpRequest();
 
 ajax.onreadystatechange = function() {
     if (ajax.readyState === 4) {
-        console.log(JSON.parse(ajax.responseText));
-        gtaLocator.updateLocation(JSON.parse(ajax.responseText));
+        const response = JSON.parse(ajax.responseText);
+        console.log(response);
+        gtaLocator.updateLocation(response.geotags);
+        updateList(response.geotags, response.page, response.next);
     }
 };
 
@@ -102,7 +104,29 @@ document.getElementById("submitDiscovery").addEventListener("click",function (ev
     }
 });
 
+document.getElementById("firstPage").addEventListener("click", function () {
+    ajax.open("GET", "/geotags?page=" + (document.getElementById("firstPage").value - 1));
+    ajax.send(null);
+});
 
+document.getElementById("thirdPage").addEventListener("click", function () {
+    ajax.open("GET", "/geotags?page=" + (document.getElementById("thirdPage").value - 1));
+    ajax.send(null);
+});
+
+document.getElementById("backwards").addEventListener("click", function () {
+    if (!document.getElementById("firstPage").hidden) {
+        ajax.open("GET", "/geotags?page=" + (document.getElementById("firstPage").value - 1));
+        ajax.send(null);
+    }
+});
+
+document.getElementById("forwards").addEventListener("click", function () {
+    if (!document.getElementById("thirdPage").hidden) {
+        ajax.open("GET", "/geotags?page=" + (document.getElementById("thirdPage").value - 1));
+        ajax.send(null);
+    }
+});
 // Mock-Up
 /*GEOLOCATIONAPI = {
     getCurrentPosition: function(onsuccess) {
@@ -226,14 +250,21 @@ var gtaLocator = (function GtaLocator(geoLocationApi) {
                 let long = document.getElementById("myLongDiscovery").value;
                 document.getElementById("result-img").setAttribute("src", getLocationMapSrc(lat, long, taglist, 5));
             }
-            updateList(taglist);
         }
 
     }; // ... Ende öffentlicher Teil
 })(GEOLOCATIONAPI);
 
+/**
+ * List attributes:
+ * Number of Elements per page: 5
+ *
+ * @param taglist
+ * @param page
+ * @param next
+ */
 
-function updateList(taglist) {
+function updateList(taglist, page, next) {
     let ul = document.getElementById("results");
     //remove all children
     while (ul.lastElementChild) {
@@ -245,6 +276,24 @@ function updateList(taglist) {
         li.innerText = item.name + " (" + item.latitude + ", " + item.longitude + ") " + item.hashtag;
         ul.appendChild(li);
     });
+    //reset display
+    document.getElementById("firstPage").hidden = true;
+    document.getElementById("thirdPage").hidden = true;
+    //convert from string to int
+    page = parseInt(page);
+    //set page numbers and hide buttons if needed
+    document.getElementById("secondPage").value = page + 1;
+    if (next) {
+        document.getElementById("thirdPage").value = page + 2;
+        document.getElementById("thirdPage").hidden = false;
+    }
+    if (page > 0) {
+        document.getElementById("firstPage").value = page;
+        document.getElementById("firstPage").hidden = false;
+    }
+    if (page === 0) {
+        document.getElementById("firstPage").hidden = true;
+    }
 }
 
 
