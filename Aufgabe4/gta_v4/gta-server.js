@@ -135,6 +135,9 @@ app.get('/', function(req, res) {
 
 /**
  * Route mit Pfad '/geotags' für HTTP 'POST' Requests.
+ * initialises a new session
+ * the routes() method is called to get all geotags from the first page
+ * returns page 0 to the user
  */
 
 app.post("/geotags", function (req, res) {
@@ -150,7 +153,18 @@ app.post("/geotags", function (req, res) {
 
 
 /**
- * Route mit Pfad '/geotags' für HTTP 'POST' Requests.
+ * Route mit Pfad '/geotags' für HTTP 'GET' Requests.
+ * uses sessions to manage cash of every current search of every user
+ * if a session already exists, check if page has already been loaded.
+ *
+ * If this is the case: data will be extracted from the saved list in the session
+ * If not, the routes() method is called to search for the next few objects of the table page
+ *
+ * If a session doesnt exist yet or a new search has been started, the routes() method is called with page 0
+ * The query, page and list is saved in the session
+ *
+ * returns page 0 of the specified route if no session is activ
+ * returns page [page] of the route already defined in the first search
  */
 
 app.get("/geotags", function (req,res) {
