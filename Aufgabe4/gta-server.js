@@ -28,10 +28,6 @@ app.use(express.static(__dirname + "/public"));
  * GeoTag Objekte sollen min. alle Felder des 'tag-form' Formulars aufnehmen.
  */
 
-function getId() {
-    return Date.now().toString(36) + Math.random().toString(36).substr(2);
-}
-
 function geoTagObject(longitude, latitude, name, hashtag, id) {
     this.longitude = longitude;
     this.latitude = latitude;
@@ -136,7 +132,8 @@ app.get('/', function(req, res) {
         longitude : "",
         latitude: "",
         myLong: "",
-        myLat: ""
+        myLat: "",
+        numberOfPages:  calculateNumberOfPages()
     });
 });
 
@@ -151,11 +148,12 @@ app.post("/tagging", function (req, res) {
     geoTagModul.addGeoTag(newGeoTag);
 
     var list = {
-        taglist: geoTagModul.geotags,
+        taglist: geoTagsForPages(geoTagModul.geotags),
         longitude: body.longitude,
         latitude: body.latitude,
         myLong: body.myLong,
-        myLat: body.myLat
+        myLat: body.myLat,
+        numberOfPages:  calculateNumberOfPages()
     }
     console.log("return geoTagItems")
     res.render('gta', list);
@@ -177,11 +175,12 @@ app.post("/discovery", function (req,res) {
     }
 
     var list = {
-        taglist: tempList,
+        taglist: geoTagsForPages(tempList),
         longitude: body.longitude,
         latitude: body.latitude,
         myLong: body.myLong,
-        myLat: body.myLat
+        myLat: body.myLat,
+        numberOfPages:  calculateNumberOfPages()
     }
 
     console.log("return geoTagItems")
@@ -190,48 +189,82 @@ app.post("/discovery", function (req,res) {
 
 // 1. Route anlegen neuer ressourcen -> GET
 app.post("/geotags", async function (req, res) {
-    console.log(req.body);
     var body = req.body;
     var newGeoTag = new geoTagObject(body.longitude, body.latitude, body.name, body.hashtag, body.id);
     geoTagModul.addGeoTag(newGeoTag);
 
     var list = {
-        taglist: geoTagModul.geotags,
+        taglist: geoTagsForPages(geoTagModul.geotags),
         longitude: body.longitude,
         latitude: body.latitude,
         myLong: body.myLong,
-        myLat: body.myLat
+        myLat: body.myLat,
+        numberOfPages:  calculateNumberOfPages()
     }
     res.location(newGeoTag.id);
     res.status(201);
     res.send(list);
 });
 
-// 2. Route zur Suche von Ressourcen -> POST
+// 2. Route zur Suche und Paging von Ressourcen -> POST
+
+function calculateNumberOfPages() {
+    let numberOfElementsForPage = 2
+    if (geoTagModul.geotags.length >= numberOfElementsForPage) {
+        return Math.round(geoTagModul.geotags.length / numberOfElementsForPage);
+    } else if (geoTagModul.geotags.length === 0) {
+        return 0;
+    } else {
+        return 1;
+    }
+}
+
+function geoTagsForPages(geoTags) {
+    console.log("START FILTER");
+    let numberOfElementsForPage = 2
+    console.log(pageIndex);
+    let startIndex = numberOfElementsForPage * pageIndex - numberOfElementsForPage;
+    let endIndex =  numberOfElementsForPage * pageIndex;
+    let slicedGeoTags = geoTags.slice(startIndex, endIndex);
+    console.log(slicedGeoTags);
+    console.log(startIndex, endIndex);
+    return slicedGeoTags;
+}
+
+var pageIndex = 1;
 
 app.get("/geotags", async function (req, res) {
     let searchTerm = req.query["searchterm"];
+    let pageIndexQuery = req.query["pageIndex"];
     let myLat = req.query["myLat"];
     let myLong = req.query["myLong"];
-    console.log(searchTerm);
     var body = req.body;
 
     var tempList;
-    if (searchTerm === undefined || searchTerm === "") {
+    if ((searchTerm === undefined || searchTerm === "") && (pageIndexQuery === undefined)) {
+        pageIndex = 1;
         if (searchTerm === undefined) {
             tempList = geoTagModul.geotags;
         } else {
             tempList = geoTagModul.searchByCoordinates(myLong, myLat, stdRadius);
         }
+    } else if (pageIndexQuery) {
+        pageIndex = parseInt(pageIndexQuery);
+        tempList = geoTagModul.geotags;
     } else {
+        pageIndex = 1;
         tempList = geoTagModul.searchTerm(searchTerm);
     }
+
+    console.log(pageIndex);
+
     var list = {
-        taglist: tempList,
+        taglist: geoTagsForPages(tempList),
         longitude: body.longitude,
         latitude: body.latitude,
         myLong: myLong,
-        myLat: myLat
+        myLat: myLat,
+        numberOfPages:  calculateNumberOfPages()
     }
 
     res.send(list);
@@ -241,10 +274,8 @@ app.get("/geotags", async function (req, res) {
 
 app.get("/geotags/:id", async function (req, res) {
     var id = req.params.id;
-    console.log(id);
     res.send(geoTagModul.getGeoTagById(id));
 });
-
 
 // 4. Route Ändern -> PUT
 
@@ -256,7 +287,7 @@ app.put("/geotags/:id", async function (req, res) {
     res.send(toChangeGeoTag);
 });
 
-// 5. Route Löschen -> DELTE
+// 5. Route Löschen -> DELETE
 app.delete("/geotags/:id", async function (req, res) {
     var id = req.params.id;
     geoTagModul.removeGeoTag(id);

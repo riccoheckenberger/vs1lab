@@ -46,6 +46,7 @@ GEOLOCATIONAPI = navigator.geolocation;
 var gtaLocator = (function GtaLocator(geoLocationApi) {
 
     // Private Member
+    var pageIndex = 1;
 
     /**
      * Funktion spricht Geolocation API an.
@@ -117,6 +118,108 @@ var gtaLocator = (function GtaLocator(geoLocationApi) {
         return urlString;
     };
 
+    function buildListWithPager(geotags, numberOfPages, module) {
+        let html = [];
+        let pagingHtml = [];
+        geotags.forEach(function(gtag){
+            html.push(`<li>${gtag.name} (${gtag.latitude}, ${gtag.longitude}) ${gtag.hashtag}</li>`);
+        });
+
+        if (numberOfPages != 0) {
+            pagingHtml.push(`<button id="backward"><<</button>`);
+            for(var i = 1; i < numberOfPages + 1; i++) {
+                if (i == pageIndex) {
+                    console.log("was in here");
+                    pagingHtml.push(`<button style="background-color: #5bc0de" id = ${i} > ${i} </button>`);
+                } else {
+                    pagingHtml.push(`<button id = ${i} > ${i} </button>`);
+                }
+            }
+            pagingHtml.push(`<button id="forward">>></button>`);
+        }
+
+        document.getElementById("paging").innerHTML = pagingHtml.join("");
+        document.getElementById("results").innerHTML = html.join("");
+        addEventListenerForBackward(numberOfPages);
+        addEventListenerForForward(numberOfPages);
+        addEventListenerForPager(numberOfPages);
+    }
+
+    function addEventListenerForBackward(numberOfPages) {
+        let backwardButton = document.getElementById("backward");
+        backwardButton.onclick = function () {
+            if (pageIndex <= numberOfPages && pageIndex > 1) {
+                pageIndex = pageIndex - 1;
+                var ajax = new XMLHttpRequest();
+                ajax.onreadystatechange = function () {
+                    if (ajax.readyState == 4) {
+                        let json = ajax.response;
+                        let module = JSON.parse(json);
+                        let geotags = module.taglist;
+                        let numberOfPages = module.numberOfPages;
+                        buildListWithPager(geotags, numberOfPages, module);
+                    }
+                }
+                let myLong = document.getElementById("myLongTagging").value
+                let myLat = document.getElementById("myLatTagging").value
+                ajax.open("GET", "/geotags?pageIndex=" + pageIndex + "&myLat=" + myLat + "&myLong=" + myLong, true);
+                ajax.send();
+            }
+        }
+    }
+
+    function addEventListenerForForward(numberOfPages) {
+        let forwardButton = document.getElementById("forward");
+        forwardButton.onclick = function() {
+            if (pageIndex >= 1 && pageIndex < numberOfPages) {
+                pageIndex = pageIndex + 1;
+                var ajax = new XMLHttpRequest();
+                ajax.onreadystatechange = function () {
+                    if(ajax.readyState == 4) {
+                        let json = ajax.response;
+                        let module = JSON.parse(json);
+                        let geotags = module.taglist;
+                        let numberOfPages = module.numberOfPages;
+                        buildListWithPager(geotags, numberOfPages, module);
+                    }
+                }
+                let myLong = document.getElementById("myLongTagging").value
+                let myLat = document.getElementById("myLatTagging").value
+                ajax.open("GET", "/geotags?pageIndex="+pageIndex+"&myLat="+myLat+"&myLong="+myLong, true);
+                ajax.send();
+            }
+        }
+    }
+
+    function addEventListenerForPager(numberOfPages) {
+        var buttons = [];
+        if (numberOfPages != 0) {
+            for(var i = 1; i < numberOfPages + 1; i++) {
+                let pagingButton = document.getElementById(i.toString());
+                buttons.push(pagingButton);
+            }
+            buttons.forEach(function(button) {
+                button.onclick = function() {
+                    pageIndex = button.id;
+                    var ajax = new XMLHttpRequest();
+                    ajax.onreadystatechange = function () {
+                        if(ajax.readyState == 4) {
+                            let json = ajax.response;
+                            let module = JSON.parse(json);
+                            let geotags = module.taglist;
+                            let numberOfPages = module.numberOfPages;
+                            buildListWithPager(geotags, numberOfPages, module);
+                        }
+                    }
+                    let myLong = document.getElementById("myLongTagging").value
+                    let myLat = document.getElementById("myLatTagging").value
+                    ajax.open("GET", "/geotags?pageIndex="+pageIndex+"&myLat="+myLat+"&myLong="+myLong, true);
+                    ajax.send();
+                }
+            })
+        }
+    }
+
     return { // Start öffentlicher Teil des Moduls ...
 
         // Public Member
@@ -149,9 +252,6 @@ var gtaLocator = (function GtaLocator(geoLocationApi) {
                 document.getElementById("result-img").setAttribute("src", getLocationMapSrc(lat, long, taglist, 5));
             }
         },
-        updateDiscoveryWidget: function() {
-
-        },
 
         geoTagAdded: function(event) {
             //Prevent default Forumlar Post
@@ -162,36 +262,27 @@ var gtaLocator = (function GtaLocator(geoLocationApi) {
 
             ajax.onreadystatechange = function () {
                 if(ajax.readyState == 4) {
-                    console.log("heeeeere", ajax);
-                    var json = ajax.response;
-                    var module = (JSON.parse(json));
-                    var geotags = module.taglist;
-                    var html = [];
-                    console.log(geotags);
-                    geotags.forEach(function(gtag){
-                        html.push(`<li>${gtag.name} (${gtag.latitude}, ${gtag.longitude}) ${gtag.hashtag}</li>`);
-                    });
-                    document.getElementById("results").innerHTML = html.join("");
+                    let json = ajax.response;
+                    let module = (JSON.parse(json));
+                    let geotags = module.taglist;
+                    let numberOfPages = module.numberOfPages;
+                    buildListWithPager(geotags, numberOfPages, module);
                     document.getElementById("result-img").setAttribute("src", getLocationMapSrc(module.myLat, module.myLong, geotags, 5));
                 }
             }
+
+            // Create new geoTag
             var longitude = document.getElementById("longInput").value;
             var latitude = document.getElementById("latInput").value;
             var name = document.getElementById("nameInput").value;
             var hashtag = document.getElementById("hashtagInput").value;
             var myLong = document.getElementById("myLongTagging").value
             var myLat = document.getElementById("myLatTagging").value
-
             var geotagObject = new GeoTagObject(longitude, latitude, name, hashtag, myLat, myLong);
 
-            // send cotent with POST
+            // send Geotag with POST
             ajax.setRequestHeader("Content-Type", "application/json");
-
-
-
-            console.log("seding...", geotagObject);
             ajax.send(JSON.stringify(geotagObject));
-
         },
 
         geoTagsFitlered: function(event) {
@@ -201,28 +292,20 @@ var gtaLocator = (function GtaLocator(geoLocationApi) {
             var ajax = new XMLHttpRequest();
             ajax.onreadystatechange = function () {
                 if(ajax.readyState == 4) {
-                    console.log("heeeeere", ajax);
                     var json = ajax.response;
                     var module = JSON.parse(json);
                     var geotags = module.taglist;
-                    var html = [];
-                    console.log(geotags);
-                    geotags.forEach(function(gtag){
-                        html.push(`<li>${gtag.name} (${gtag.latitude}, ${gtag.longitude}) ${gtag.hashtag}</li>`);
-                    });
-                    document.getElementById("results").innerHTML = html.join("");
-                    document.getElementById("result-img").setAttribute("src", getLocationMapSrc(module.myLat, module.myLong, geotags, 5))
+                    let numberOfPages = module.numberOfPages;
+                    buildListWithPager(geotags, numberOfPages, module);
+                    document.getElementById("result-img").setAttribute("src", getLocationMapSrc(module.myLat, module.myLong, geotags, 5));
                 }
             }
             var searchTerm = document.getElementById("searchInput").value;
-
-            // send searchTerm with GET
-
             var myLong = document.getElementById("myLongTagging").value
             var myLat = document.getElementById("myLatTagging").value
             ajax.open("GET", "/geotags?searchterm="+searchTerm+"&myLat="+myLat+"&myLong="+myLong, true);
             ajax.send();
-        }
+        },
     }; // ... Ende öffentlicher Teil
 })(GEOLOCATIONAPI);
 
