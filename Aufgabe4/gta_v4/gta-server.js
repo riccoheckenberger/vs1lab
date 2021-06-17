@@ -49,18 +49,42 @@ var geoTagModul = (function() {
 
     return {
 
-        geotags : function () {
-            //deep copy -> no problems when using splice-function
-            return JSON.parse(JSON.stringify(geotags));
-        },
+        geotags : geotags,
 
+
+        /**
+         * Route 2:
+         * get all geotags starting at index [lastID] all geotag's in geotags were checked or [numberOfGeotags] geotag's are found
+         *
+         * @param lastID lastID the index + 1 in geotags where the search starts
+         * @param numberOfGeotags the max amount of geotags that will be found (normally PAGE_SIZE + 1)
+         * @returns {{geotags: [], index: number}} Object with the result array and the index of the last geotag
+         */
         getGeotags : function (lastID, numberOfGeotags) {
-            let list =  spliceList(lastID + 1, lastID + numberOfGeotags + 1, geotags);
-            return {geotags : list, index: lastID + list.length };
+            let list = [];
+            let index = -1;
+            for (let i = lastID + 1; i < geotags.length && numberOfGeotags > 0; i++) {
+                list.push(geotags[i]);
+                index = i;
+                numberOfGeotags--;
+            }
+            return {geotags : list, index: index };
         },
 
 
-
+        /**
+         * Route 1
+         * searches for geotags in a radius of [radius] around the position [tempLong, tempLat]
+         * starts at index [lastID] and iterates until all geotags have been checked or there are [numberOfGeotags] amount of tags found
+         * returns an Object with the result array and the index of the last geotag
+         *
+         * @param tempLong longitude
+         * @param tempLat latitude
+         * @param radius radius in km
+         * @param lastID the index + 1 in geotags where the search starts
+         * @param numberOfGeotags the max amount of geotags that will be found (normally PAGE_SIZE + 1)
+         * @returns {{geotags: [], index}} Object with the result array and the index of the last geotag
+         */
         searchByCoordinates : function (tempLong, tempLat, radius, lastID, numberOfGeotags) {
             let returnGeoTags = [];
             let index;
@@ -80,21 +104,33 @@ var geoTagModul = (function() {
             return {geotags : returnGeoTags, index : index};
         },
 
-        searchTerm : function (tempStr, lastID, numberOfGeotags) {
+        /**
+         * Route 0:
+         * searches for geotag in geotags where name = term or hashtag = term
+         * starts at index [lastID] and iterates until all geotags have been checked or there are [numberOfGeotags] amount of tags found
+         * returns an Object with the result array and the index of the last geotag
+         *
+         * @param term string that is searched for
+         * @param lastID the index + 1 in geotags where the search starts
+         * @param numberOfGeotags the max amount of geotags that will be found (normally PAGE_SIZE + 1)
+         * @returns {{geotags: [], index}} Object with the result array and the index of the last geotag
+         */
+
+        searchTerm : function (term, lastID, numberOfGeotags) {
             let returnGeoTags = [];
             let index;
             for (let i = lastID + 1; i < geotags.length && numberOfGeotags > 0; i++ ) {
                 if (geotags[i] !== undefined) {
                     const tempName = geotags[i].name;
                     const tempHashtag = geotags[i].hashtag;
-                    if (tempName === tempStr || tempHashtag === tempStr) {
+                    if (tempName === term || tempHashtag === term) {
                         returnGeoTags.push(geotags[i]);
                         index = i;
                         numberOfGeotags--;
                     }
                 }
             }
-            console.log("search for GeoTags (Term: " + tempStr  +")")
+            console.log("search for GeoTags (Term: " + term  +")")
             return {geotags : returnGeoTags, index : index};
         },
 
@@ -140,7 +176,7 @@ app.get('/', function(req, res) {
 app.post("/geotags", function (req, res) {
     let body = req.body;
     geoTagModul.addGeoTag(JSON.parse(body.geotag));
-    res.location("/geotags/" + (geoTagModul.geotags().length - 1));
+    res.location("/geotags/" + (geoTagModul.geotags.length - 1));
     //initialize session params
     req.session.query = {};
     req.session.lastID = -1;
@@ -195,7 +231,7 @@ app.get("/geotags", function (req,res) {
     else {
         if (query.page) res.json({geotags : [], page: 0, next: false}); //if the page query param is send, no new search is initialized
         console.log("create new search");
-        //setup session for first routes()
+        //setup session for routes()
         session.query = query;
         session.page = -1;
         session.lastID = -1;
@@ -211,8 +247,8 @@ app.get("/geotags", function (req,res) {
  * Route 0: search for term, if term in query exists
  * Route 1: search by radius, if radius in query exists
  * Route 2: get all items on page
- * @param session
- * @param page
+ * @param session session
+ * @param page page
  * @returns {{next: boolean, geotags: *[], page}}
  */
 
@@ -273,7 +309,6 @@ function formatResponse(list, page) {
  * @returns {any[]} returns the [pageSize] amount of objects from [list] on the specified [page]
  */
 function spliceList(from, to, list) {
-    list = JSON.parse(JSON.stringify(list));
     return list.slice(from, to);
 }
 
@@ -283,7 +318,7 @@ function spliceList(from, to, list) {
  */
 
 app.get ("/geotags/:id", function (req, res) {
-    let geotag = (geoTagModul.geotags())[req.params.id];
+    let geotag = (geoTagModul.geotags)[req.params.id];
     if (geotag !== undefined) {
         res.json(geotag);
     } else {
@@ -293,13 +328,13 @@ app.get ("/geotags/:id", function (req, res) {
 
 app.put("/geotags/:id", function (req, res) {
     let body = req.body;
-    (geoTagModul.geotags())[req.params.id] = JSON.parse(body.geotag);
+    (geoTagModul.geotags)[req.params.id] = JSON.parse(body.geotag);
     res.location("/geotags/" + req.params.id);
     res.status(201).send(null);
 });
 
 app.delete("/geotags/:id", function (req, res) {
-    geoTagModul.geotags().splice(req.params.id, 1);
+    geoTagModul.geotags.splice(req.params.id, 1);
     res.send(null);
 });
 
