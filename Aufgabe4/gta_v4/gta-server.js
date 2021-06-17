@@ -195,11 +195,13 @@ app.get("/geotags", function (req,res) {
     else {
         if (query.page) res.json({geotags : [], page: 0, next: false}); //if the page query param is send, no new search is initialized
         console.log("create new search");
-        //run query
+        //setup session for first routes()
         session.query = query;
         session.page = -1;
         session.lastID = -1;
+        //run routes()
         responseObject = routes(session, 0);
+        //set session.list cache
         session.list = responseObject.geotags;
     }
     res.json(responseObject);
