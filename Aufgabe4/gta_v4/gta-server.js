@@ -54,51 +54,48 @@ var geoTagModul = (function() {
             return JSON.parse(JSON.stringify(geotags));
         },
 
-        /**
-         *
-         * @param list
-         * @param from
-         * @param to of geotags
-         * @returns {any[]} returns the [pageSize] amount of objects from [list] on the specified [page]
-         */
-        spliceList: function (from, to, list) {
-              list = JSON.parse(JSON.stringify(list));
-              return list.slice(from, to);
+        getGeotags : function (lastID, numberOfGeotags) {
+            let list =  spliceList(lastID + 1, lastID + numberOfGeotags + 1, geotags);
+            return {geotags : list, index: lastID + list.length };
         },
 
-        searchByCoordinates : function (tempLong, tempLat, radius, lastID, pageSize) {
+
+
+        searchByCoordinates : function (tempLong, tempLat, radius, lastID, numberOfGeotags) {
             let returnGeoTags = [];
-            //check if there are going to be more pages by finding pageSize + 1 geotags
-            pageSize++;
-            for (let i = lastID + 1; i < geotags.length && pageSize > 0; i++ ) {
+            let index;
+            for (let i = lastID + 1; i < geotags.length && numberOfGeotags > 0; i++ ) {
+                console.log(geotags[i]);
                 if (geotags[i] !== undefined) {
                     const paramLong = geotags[i].longitude;
                     const paramLat = geotags[i].latitude;
                     if (calcDistance(paramLat, paramLong, tempLat, tempLong) <= radius) {
                         returnGeoTags.push(geotags[i]);
-                        pageSize--;
+                        index = i;
+                        numberOfGeotags--;
                     }
                 }
             }
             console.log("search for GeoTags (Radius)")
-            return returnGeoTags;
+            return {geotags : returnGeoTags, index : index};
         },
 
-        searchTerm : function (tempStr, lastID, pageSize) {
+        searchTerm : function (tempStr, lastID, numberOfGeotags) {
             let returnGeoTags = [];
-            pageSize++;
-            for (let i = lastID + 1; i < geotags.length && pageSize > 0; i++ ) {
+            let index;
+            for (let i = lastID + 1; i < geotags.length && numberOfGeotags > 0; i++ ) {
                 if (geotags[i] !== undefined) {
                     const tempName = geotags[i].name;
                     const tempHashtag = geotags[i].hashtag;
                     if (tempName === tempStr || tempHashtag === tempStr) {
                         returnGeoTags.push(geotags[i]);
-                        pageSize--;
+                        index = i;
+                        numberOfGeotags--;
                     }
                 }
             }
             console.log("search for GeoTags (Term: " + tempStr  +")")
-            return returnGeoTags;
+            return {geotags : returnGeoTags, index : index};
         },
 
 
@@ -144,8 +141,13 @@ app.post("/geotags", function (req, res) {
     let body = req.body;
     geoTagModul.addGeoTag(JSON.parse(body.geotag));
     res.location("/geotags/" + (geoTagModul.geotags().length - 1));
+    //initialize session params
     req.session.query = {};
+    req.session.lastID = -1;
+    req.session.page = -1;
+    //get items from route
     let responseObject = routes(req.session, 0);
+    //save list in session.list cache
     req.session.list = responseObject.geotags;
     res.json(responseObject);
 });
@@ -154,80 +156,98 @@ app.post("/geotags", function (req, res) {
 
 /**
  * Route mit Pfad '/geotags' für HTTP 'GET' Requests.
- * uses sessions to manage cash of every current search of every user
- * if a session already exists, check if page has already been loaded.
+ * Uses sessions to manage search [list] of every current search of every user
+ * A search has been initialized if a query has already been stored in the session and the url query params include a page [page] field
  *
- * If this is the case: data will be extracted from the saved list in the session
- * If not, the routes() method is called to search for the next few objects of the table page
+ * If this is the case: data will be extracted from the saved 'session.list' in the session
+ * If not, the routes() method is called to search for the next [PAGE_SIZE] objects of the table page
  *
- * If a session doesnt exist yet or a new search has been started, the routes() method is called with page 0
+ * If a session doesnt exist yet or a new search is called, the routes() method is called with starting page '0'
  * The query, page and list is saved in the session
  *
- * returns page 0 of the specified route if no session is activ
- * returns page [page] of the route already defined in the first search
+ * returns page 0 of the specified route if no session is active
+ * returns page [page] of the route already defined in the first search, stored in 'session.query'
  */
 
 app.get("/geotags", function (req,res) {
 
-    let body = req.query;
-    let session = req.session;
+    const query = req.query;
+    const session = req.session;
     let responseObject;
 
     //search has already been searched defined through page-search
-    if (body.page && session.query) {
-        if (session.list.length <= body.page * PAGE_SIZE) {
+    if (query.page && session.query) {
+        if (session.list.length <= query.page * PAGE_SIZE) {
             console.log("load new data in existing session");
             // not in session cash yet
-            responseObject = routes(session, body.page);
+            responseObject = routes(session, query.page);
             session.list = session.list.concat(responseObject.geotags);
-        } else { // already loaded at some point
-            console.log("load data from cash");
-            responseObject = formatResponse(geoTagModul.spliceList(body.page*PAGE_SIZE, body.page*PAGE_SIZE+PAGE_SIZE + 1, session.list), body.page);
+        }
+        //page has already been loaded at some point
+        else {
+            console.log("load data from cache");
+            //cut page items from cache list
+            const list = spliceList(PAGE_SIZE*query.page ,PAGE_SIZE + PAGE_SIZE * query.page + 1 ,session.list);
+            responseObject = formatResponse(list, query.page);
         }
     }
     //new search
     else {
-        if (body.page) res.json({geotags : [], page: 0, next: false});
+        if (query.page) res.json({geotags : [], page: 0, next: false}); //if the page query param is send, no new search is initialized
         console.log("create new search");
         //run query
-        session.query = body;
-        session.page = 0;
+        session.query = query;
+        session.page = -1;
+        session.lastID = -1;
         responseObject = routes(session, 0);
-        //save query results in session
         session.list = responseObject.geotags;
     }
     res.json(responseObject);
 });
 
+/**
+ * Route 0: search for term, if term in query exists
+ * Route 1: search by radius, if radius in query exists
+ * Route 2: get all items on page
+ * @param session
+ * @param page
+ * @returns {{next: boolean, geotags: *[], page}}
+ */
 
 function routes (session, page) {
     let list;
     let lastID = session.lastID;
     let query = session.query;
+
     //Route 0: search for name
     if (query.term !== undefined &&  query.term !== "") {
         console.log("route: term");
-        console.log(((page*PAGE_SIZE) + PAGE_SIZE) - (session.page*PAGE_SIZE));
-        list = geoTagModul.searchTerm(query.term, lastID, ((page*PAGE_SIZE) + PAGE_SIZE) - (session.page*PAGE_SIZE));
-        list = geoTagModul.spliceList(page*PAGE_SIZE,(page*PAGE_SIZE) +PAGE_SIZE + 1,list);
+        const numLoadingObject = (page*PAGE_SIZE) - (session.page*PAGE_SIZE) + 1;
+        //search for term until [numLoadingObjects] geotags are found (upper limit)
+        list = geoTagModul.searchTerm(query.term, lastID, numLoadingObject);
+        console.log(list);
     }
     //Route 1: search by radius
-    else if (query.radius !== undefined && query.radius !== "") {
-        if (isNaN(query.radius)) {return undefined;}
+    else if (query.radius !== undefined && query.radius !== "" && !isNaN(query.radius)) {
         console.log("route: radius");
-        list = geoTagModul.searchByCoordinates(query.myLong,query.myLat,query.radius, lastID, ((page*PAGE_SIZE) + PAGE_SIZE) - (session.page*PAGE_SIZE));
-        list = geoTagModul.spliceList(page*PAGE_SIZE,(page*PAGE_SIZE) +PAGE_SIZE + 1,list);
+        const numLoadingObject = (page*PAGE_SIZE) - (session.page*PAGE_SIZE) + 1;
+        //search for radius until [numLoadingObjects] geotags are found (upper limit)
+        list = geoTagModul.searchByCoordinates(query.myLong,query.myLat,query.radius, lastID, numLoadingObject);
     }
     //Route 2: get all geotags
     else {
         console.log("route: all");
-        //get the first [pageSize + 1] amount of geotags for page 0
-        list = geoTagModul.spliceList(page*PAGE_SIZE,(page*PAGE_SIZE) +PAGE_SIZE + 1,geoTagModul.geotags());
+        list = geoTagModul.getGeotags(session.lastID, PAGE_SIZE + 1);
     }
-    session.lastID = geoTagModul.geotags().indexOf(list[list.length - 1]);
-    session.page = (page > session.page ? page : session.page);
-    return  formatResponse(list, page);
+
+    const responseObject = formatResponse(list.geotags, page);
+    //set session.lastID is the index of the last geotag in geotags[]; needs to be stored in session to know where to start searching again
+    session.lastID = list.geotags.length > PAGE_SIZE ? list.index - 1 : list.index;
+    //the last page stored in cache
+    session.page = page;
+    return  responseObject;
 }
+
 
 /**
  * response Structure: {geotags: [type : array], page : [type : number], next [type: boolean]}
@@ -237,8 +257,22 @@ function routes (session, page) {
  */
 
 function formatResponse(list, page) {
+    //check if a next page exists
     let nextBoolean = list.length > PAGE_SIZE;
-    return  {geotags : (nextBoolean ? geoTagModul.spliceList(0, PAGE_SIZE, list) : list), page : page , next : nextBoolean};
+    //format response object
+    return  {geotags : (nextBoolean ? spliceList(0, PAGE_SIZE, list) : list), page : page , next : nextBoolean};
+}
+
+/**
+ *
+ * @param list
+ * @param from
+ * @param to of geotags
+ * @returns {any[]} returns the [pageSize] amount of objects from [list] on the specified [page]
+ */
+function spliceList(from, to, list) {
+    list = JSON.parse(JSON.stringify(list));
+    return list.slice(from, to);
 }
 
 /**
