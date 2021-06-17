@@ -300,7 +300,7 @@ function formatResponse(session, page) {
  *
  * @param list
  * @param from
- * @param to of geotags
+ * @param to
  * @returns {any[]} returns the [pageSize] amount of objects from [list] on the specified [page]
  */
 function spliceList(from, to, list) {

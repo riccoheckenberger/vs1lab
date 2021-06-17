@@ -121,3 +121,7 @@ main {
 #secondPage {
   color: black;
 }
+
+.scale {
+  width: 30px;
+}

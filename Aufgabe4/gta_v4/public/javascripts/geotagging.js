@@ -4,6 +4,9 @@
  */
 console.log("The script is going to start...");
 
+const RADIUS = 500; //km
+let zoom = 10;
+
 /**
  * Geotag Constructor
  */
@@ -73,7 +76,7 @@ document.getElementById("submitTagging").addEventListener("click",function (even
  * @type {number}
  */
 
-const RADIUS = 500; //km
+
 
 document.getElementById("submitDiscovery").addEventListener("click",function (event) {
     if (checkValidity("filter-form")) {
@@ -127,6 +130,21 @@ document.getElementById("forwards").addEventListener("click", function () {
         ajax.send(null);
     }
 });
+
+document.getElementById("plus").addEventListener("click", function (){
+   if (zoom < 18) {
+       zoom++;
+       gtaLocator.updateLocation(JSON.parse(document.getElementById("result-img").getAttribute("data-taglist")));
+   }
+});
+
+document.getElementById("minus").addEventListener("click", function (){
+    if (zoom >  0) {
+        zoom--;
+        gtaLocator.updateLocation(JSON.parse(document.getElementById("result-img").getAttribute("data-taglist")));
+    }
+});
+
 // Mock-Up
 /*GEOLOCATIONAPI = {
     getCurrentPosition: function(onsuccess) {
@@ -231,6 +249,7 @@ var gtaLocator = (function GtaLocator(geoLocationApi) {
         readme: "Dieses Objekt enthält 'öffentliche' Teile des Moduls.",
 
         updateLocation: function(taglist) {
+            document.getElementById("result-img").setAttribute("data-taglist", JSON.stringify(taglist));
             if (document.getElementById("myLongDiscovery").value === "" &&  document.getElementById("myLatDiscovery").value === "") {
                 tryLocate(function (position) {
                     let longitude =  getLongitude(position);
@@ -241,14 +260,14 @@ var gtaLocator = (function GtaLocator(geoLocationApi) {
                     document.getElementById("myLatDiscovery").setAttribute("value", latitude);
                     document.getElementById("myLongDiscovery").setAttribute("value", longitude);
 
-                    document.getElementById("result-img").setAttribute("src", getLocationMapSrc(latitude, longitude, taglist, 5));
+                    document.getElementById("result-img").setAttribute("src", getLocationMapSrc(latitude, longitude, taglist, zoom));
                 }, function (msg) {
                     alert(msg);
                 });
             } else {
                 let lat = document.getElementById("myLatDiscovery").value;
                 let long = document.getElementById("myLongDiscovery").value;
-                document.getElementById("result-img").setAttribute("src", getLocationMapSrc(lat, long, taglist, 5));
+                document.getElementById("result-img").setAttribute("src", getLocationMapSrc(lat, long, taglist, zoom));
             }
         }
 
