@@ -62,7 +62,7 @@ var geoTagModul = (function() {
          */
         getGeotags : function (lastID, numberOfGeotags) {
             let list = [];
-            let index = -1;
+            let index = lastID;
             for (let i = lastID + 1; i < geotags.length && numberOfGeotags > 0; i++) {
                 list.push(geotags[i]);
                 index = i;
@@ -89,7 +89,6 @@ var geoTagModul = (function() {
             let returnGeoTags = [];
             let index;
             for (let i = lastID + 1; i < geotags.length && numberOfGeotags > 0; i++ ) {
-                console.log(geotags[i]);
                 if (geotags[i] !== undefined) {
                     const paramLong = geotags[i].longitude;
                     const paramLat = geotags[i].latitude;
@@ -180,11 +179,9 @@ app.post("/geotags", function (req, res) {
     //initialize session params
     req.session.query = {};
     req.session.lastID = -1;
-    req.session.page = -1;
+    req.session.list = [];
     //get items from route
     let responseObject = routes(req.session, 0);
-    //save list in session.list cache
-    req.session.list = responseObject.geotags;
     res.json(responseObject);
 });
 
@@ -213,18 +210,18 @@ app.get("/geotags", function (req,res) {
 
     //search has already been searched defined through page-search
     if (query.page && session.query) {
-        if (session.list.length <= query.page * PAGE_SIZE) {
+        const page = parseInt(query.page);
+        if (Math.floor(session.list.length/ PAGE_SIZE)  <= page) {
             console.log("load new data in existing session");
             // not in session cash yet
-            responseObject = routes(session, query.page);
-            session.list = session.list.concat(responseObject.geotags);
+            responseObject = routes(session, page);
+
         }
         //page has already been loaded at some point
         else {
             console.log("load data from cache");
             //cut page items from cache list
-            const list = spliceList(PAGE_SIZE*query.page ,PAGE_SIZE + PAGE_SIZE * query.page + 1 ,session.list);
-            responseObject = formatResponse(list, query.page);
+            responseObject = formatResponse(session, page);
         }
     }
     //new search
@@ -233,12 +230,11 @@ app.get("/geotags", function (req,res) {
         console.log("create new search");
         //setup session for routes()
         session.query = query;
-        session.page = -1;
         session.lastID = -1;
+        session.list = [];
         //run routes()
         responseObject = routes(session, 0);
         //set session.list cache
-        session.list = responseObject.geotags;
     }
     res.json(responseObject);
 });
@@ -256,49 +252,48 @@ function routes (session, page) {
     let list;
     let lastID = session.lastID;
     let query = session.query;
+    const numLoadingObject = (page+1) * PAGE_SIZE - session.list.length + 1;
 
     //Route 0: search for name
     if (query.term !== undefined &&  query.term !== "") {
         console.log("route: term");
-        const numLoadingObject = (page*PAGE_SIZE) - (session.page*PAGE_SIZE) + 1;
         //search for term until [numLoadingObjects] geotags are found (upper limit)
         list = geoTagModul.searchTerm(query.term, lastID, numLoadingObject);
-        console.log(list);
     }
     //Route 1: search by radius
     else if (query.radius !== undefined && query.radius !== "" && !isNaN(query.radius)) {
         console.log("route: radius");
-        const numLoadingObject = (page*PAGE_SIZE) - (session.page*PAGE_SIZE) + 1;
         //search for radius until [numLoadingObjects] geotags are found (upper limit)
         list = geoTagModul.searchByCoordinates(query.myLong,query.myLat,query.radius, lastID, numLoadingObject);
     }
     //Route 2: get all geotags
     else {
         console.log("route: all");
-        list = geoTagModul.getGeotags(session.lastID, PAGE_SIZE + 1);
+        //search for all geotag's in geotags
+        list = geoTagModul.getGeotags(session.lastID, numLoadingObject);
     }
 
-    const responseObject = formatResponse(list.geotags, page);
+    //save list in cache
+    session.list = session.list.concat(list.geotags);
+    const responseObject = formatResponse(session, page);
     //set session.lastID is the index of the last geotag in geotags[]; needs to be stored in session to know where to start searching again
-    session.lastID = list.geotags.length > PAGE_SIZE ? list.index - 1 : list.index;
-    //the last page stored in cache
-    session.page = page;
+    session.lastID = (list.index > session.lastID ? list.index : session.lastID);
     return  responseObject;
 }
 
 
 /**
  * response Structure: {geotags: [type : array], page : [type : number], next [type: boolean]}
- * @param list
+ * @param session
  * @param page
  * @returns {{next: boolean, geotags: *[], page}}
  */
 
-function formatResponse(list, page) {
+function formatResponse(session, page) {
     //check if a next page exists
-    let nextBoolean = list.length > PAGE_SIZE;
+    let nextBoolean = session.list[(page+1)*PAGE_SIZE] !== undefined;
     //format response object
-    return  {geotags : (nextBoolean ? spliceList(0, PAGE_SIZE, list) : list), page : page , next : nextBoolean};
+    return  {geotags : spliceList(page*PAGE_SIZE, (page + 1) * PAGE_SIZE, session.list), page : page , next : nextBoolean};
 }
 
 /**
