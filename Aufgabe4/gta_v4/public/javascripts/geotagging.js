@@ -66,6 +66,7 @@ document.getElementById("submitDiscovery").addEventListener("click", function (e
     body += "&myLong=" + myLongInput.value + "&myLat=" + myLatInput.value ;
     //ajax Get request
     ajax.open("GET", "/geotags?" + body);
+    console.log("test")
     ajax.send(null);
     event.preventDefault();
 }})
