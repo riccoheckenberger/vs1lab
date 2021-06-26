@@ -268,6 +268,10 @@ var gtaLocator = (function GtaLocator(geoLocationApi) {
                 let lat = document.getElementById("myLatDiscovery").value;
                 let long = document.getElementById("myLongDiscovery").value;
                 document.getElementById("result-img").setAttribute("src", getLocationMapSrc(lat, long, taglist, zoom));
+                let canvas = document.createElement("canvas");
+                canvas.setAttribute("id", "game");
+                document.querySelector("h1")
+                document.body.appendChild(canvas);
             }
         }
 
