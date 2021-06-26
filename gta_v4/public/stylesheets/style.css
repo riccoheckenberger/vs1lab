@@ -1,0 +1,120 @@
+@media all and (min-width: 1000px) {
+  .row {
+    display: flex;
+    flex-direction: row;
+  }
+}
+
+@media all and (max-width: 1000px) {
+  .row {
+    /* On small screens, we are no longer using row direction but column */
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.col-1 {
+  order: 1;
+  flex-basis: 8.33%;}
+.col-2 {
+  flex-basis: 16.66%;
+  order: 2;}
+.col-3 {
+  flex-basis: 25%;
+  order: 3;}
+.col-4 {
+  flex-basis: 33.33%;
+  order:4;}
+.col-5 {
+  flex-basis: 41.66%;
+  order: 5;}
+.col-6 {
+  flex-basis: 50%;
+  order: 6;}
+.col-7 {
+  flex-basis: 58.33%;
+  order: 7;}
+.col-8 {
+  flex-basis: 66.66%;
+  order: 8;}
+.col-9 {
+  flex-basis: 75%;
+  order: 9;}
+.col-10 {
+  flex-basis: 83.33%;
+  order: 10;}
+.col-11 {
+  flex-basis: 91.66%;
+  order: 11;}
+.col-12 {
+  flex-basis: 100%;
+  order: 12;}
+
+[class*="col-"] {
+  justify-content: flex-start;
+  padding: 15px;
+}
+
+.row::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
+body {
+  background-color: #f9f9f9;
+  padding: 50px;
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+
+header, footer, .caption {
+  background-color: grey;
+  color: white;
+  border: 1px solid darkgray;
+  padding: 10px;
+  text-align: center;
+}
+
+ul li  {
+  list-style-type: none;
+  margin-bottom: 5px;
+  padding: 7px;
+  background-color: deepskyblue;
+  color: white;
+}
+
+#results {
+  padding: 0;
+}
+
+input {
+  height: 30px;
+}
+
+.legend {
+  font-weight: bold;
+}
+
+#tag-form label, #submitTagging{
+  display:block;
+  margin-top: 10px;
+  margin-bottom: 2px;
+}
+
+main {
+  border-left: 1px darkgray solid;
+  border-right: 1px darkgray solid;
+  background-color: white;
+}
+#result-img {
+  width: 100%;
+}
+
+button {
+  height: 30px;
+  margin: 5px;
+}
