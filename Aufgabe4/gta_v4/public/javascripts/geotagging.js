@@ -19,18 +19,7 @@ function GeoTagObject(longitude, latitude, name, hashtag) {
  * creates ajax object
  * @type {XMLHttpRequest}
  */
-const ajax = new XMLHttpRequest();
 
-/**
- * ajax response listener
- */
-
-ajax.onreadystatechange = function() {
-    if (ajax.readyState === 4) {
-        console.log(JSON.parse(ajax.responseText));
-        gtaLocator.updateLocation(JSON.parse(ajax.responseText));
-    }
-};
 
 /**
  * checks if all required form fields are filled
@@ -51,6 +40,7 @@ function checkValidity(formID) {
 document.getElementById("submitTagging").addEventListener("click",function (event) {
     if  (checkValidity("tag-form")) {
         //DOM objects
+        const ajax = new XMLHttpRequest();
         const latInput = document.getElementById("latInput");
         const longInput = document.getElementById("longInput");
         const nameInput = document.getElementById("nameInput");
@@ -61,6 +51,18 @@ document.getElementById("submitTagging").addEventListener("click",function (even
         ajax.open("POST", "/geotags", true);
         ajax.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
         ajax.send("geotag=" + JSON.stringify(geotag));
+
+
+
+        /**
+         * ajax response listener
+         */
+
+        ajax.onreadystatechange = function() {
+            if (ajax.readyState === 4) {
+                gtaLocator.updateLocation(JSON.parse(ajax.responseText));
+            }
+        };
         event.preventDefault();
     }
 
@@ -80,7 +82,7 @@ document.getElementById("submitDiscovery").addEventListener("click",function (ev
         const myLat = document.getElementById("myLatDiscovery");
         const searchInput = document.getElementById("searchInput");
         //create body
-
+        const ajax = new XMLHttpRequest();
         //radius or term
         let body;
         if (searchInput.value === "") {
@@ -94,6 +96,12 @@ document.getElementById("submitDiscovery").addEventListener("click",function (ev
                 body += searchInput.value;
             }
         }
+
+        ajax.onreadystatechange = function() {
+            if (ajax.readyState === 4) {
+                gtaLocator.updateLocation(JSON.parse(ajax.responseText));
+            }
+        };
         body += "&myLong=" + myLong.value + "&myLat=" + myLat.value ;
         //ajax post request
         ajax.open("GET", "/geotags?" + body);
@@ -257,6 +265,13 @@ function updateList(taglist) {
  * angegebene Funktion aufgerufen.
  */
 $(function() {
+    const ajax = new XMLHttpRequest();
+
     ajax.open("GET", "/geotags", true);
     ajax.send(null);
+    ajax.onreadystatechange = function() {
+        if (ajax.readyState === 4) {
+            gtaLocator.updateLocation(JSON.parse(ajax.responseText));
+        }
+    };
 });

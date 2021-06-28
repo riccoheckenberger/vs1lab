@@ -103,6 +103,7 @@ app.get('/', function(req, res) {
 
 app.post("/geotags", function (req, res) {
     let body = req.body;
+    //TODO
     geoTagModul.addGeoTag(JSON.parse(body.geotag));
     res.location("/geotags/" + (geoTagModul.geotags.length - 1));
     res.status(201).json(geoTagModul.geotags);
